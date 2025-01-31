@@ -23,6 +23,19 @@ public class Path : MonoBehaviour
         nodes[nodes.Length - 1] = position;
     }
     
+    public void RemoveNode(int index)
+    {
+        if (index < 0 || index >= nodes.Length) return;
+        
+        for (int i = index; i < nodes.Length - 1; i++)
+        {
+            nodes[i] = nodes[i + 1];
+        }
+        
+        Array.Resize(ref nodes, nodes.Length - 1);
+    }
+    
+    
     private void OnDrawGizmos()
     {
         if (nodes == null) return;
