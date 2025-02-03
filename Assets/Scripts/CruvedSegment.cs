@@ -20,5 +20,5 @@ public abstract class CruvedSegment : Segment
             => Nodes[index];
 
         protected abstract void GenerateSegment();
-
+        
 }

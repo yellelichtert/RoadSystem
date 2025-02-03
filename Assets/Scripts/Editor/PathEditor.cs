@@ -12,7 +12,7 @@ namespace Editor
         
         private SegmentType _selectedSegmentType;
         private enum SegmentType 
-        {Straight, Curved}
+        {Straight, Curved, ComplexCurved}
         
         
         private int? _selectedSegment;
@@ -83,10 +83,9 @@ namespace Editor
                     {
                         bool isCurrentlySelected = _selectedSegment == i && _selectedControlPoint == j;
                         
-                        
                         if (segment.ControlPointAmount == segment.GetMaxControlPoints())
                         {
-                            CreateSegment(controlPoint);
+                            CreateSegment();
                         }
                         else if (isCurrentlySelected)
                         {
@@ -149,12 +148,13 @@ namespace Editor
 
 
 
-        private void CreateSegment(Vector3? firstPoint = null)
+        private void CreateSegment()
         {
             Segment segment = _selectedSegmentType switch
             {
                 SegmentType.Straight => new Segment(),
                 SegmentType.Curved => new SimpleCurvedSegment(),
+                SegmentType.ComplexCurved => new ComplexCurvedSegment(),
                 _ => throw new ArgumentOutOfRangeException()
             };
 
