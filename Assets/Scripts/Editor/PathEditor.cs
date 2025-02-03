@@ -1,8 +1,5 @@
-using System;
-using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Editor
 {
@@ -11,7 +8,8 @@ namespace Editor
     {
         private Path Path => (Path)target;
         
-        private int? _selectedNode;
+        private int? _selectedSegment;
+        private int? _selectedControlPoint;
         private Vector3? _originalPosition;
         
         
@@ -22,99 +20,82 @@ namespace Editor
         }
         
         
-
         private void OnSceneGUI()
         {
-            
-            
             Event e = Event.current;
-            
             
             RaycastHit hit;
             Vector3 mousePosition = e.mousePosition;
             Ray ray = HandleUtility.GUIPointToWorldRay(mousePosition);
             Physics.Raycast(ray, out hit);
             
-            
-            if (Path.NodeCount == 0)
+            if (Path.SegmentAmount == 0)
             {
-                CreateNewNode();
+                CreateSegment();
             }
             
-            //Draw Buttons
-            for (int i = 0; i < Path.NodeCount; i++)
+            //Draw buttons
+            for (int i = 0; i < Path.SegmentAmount; i++)
             {
-                Vector3 position = Path.GetNode(i);
-                if (Handles.Button(position, quaternion.identity, 0.2f, 0.2f, Handles.SphereHandleCap))
-                {
-                    if (_selectedNode == i)
-                    {
-                        CreateNewNode();
-                    }
-                    else
-                    {
-                        _selectedNode = i;
-                        _originalPosition = position;
-                    }
-                }
-            }
-            
-            //Follow Mouse
-            if (_selectedNode.HasValue)
-            {
-                Vector3 nodePostition = Path.GetNode(_selectedNode.Value);
-                Vector3 newPostition = hit.point;
-
-                if (nodePostition != newPostition)
-                {
-                    Path.SetNode(_selectedNode.Value, newPostition);
-                }
-            }
-
-            
-            //Undo Section
-            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Backspace && _selectedNode.HasValue)
-            {
-                Path.RemoveNode(_selectedNode.Value);
-
-                if (_selectedNode.Value == Path.NodeCount)
-                {
-                    _selectedNode = Path.NodeCount-1;
-                    _originalPosition = Path.GetNode(_selectedNode.Value);
-                }
-                else
-                {
-                    _selectedNode = null;
-                }
-            }
-            
-            
-            //Exit Edit Mode
-            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape && _selectedNode.HasValue)
-            {
+                Segment segment = Path.GetSegment(i);
                 
-                if (_originalPosition.HasValue)
+                for (int j = 0; j < segment.ControlPointAmount; j++)
                 {
-                    Path.SetNode(_selectedNode!.Value, _originalPosition.Value);
-                    _originalPosition = null;
+                    Vector3 controlPoint = segment.GetControlPoint(j);
+                    
+                    if (Handles.Button(controlPoint, Quaternion.identity, 0.5f, 0.5f,  Handles.DotHandleCap))
+                    {
+                        bool isCurrentlySelected = _selectedSegment == i && _selectedControlPoint == j;
+                        
+                        if (segment.ControlPointAmount == segment.MaxControlPointAmount)
+                        {
+                            CreateSegment(controlPoint);
+                        }
+                        else if (isCurrentlySelected)
+                        {
+                            segment.AddControlPoint(hit.point);
+                            _selectedControlPoint = segment.ControlPointAmount-1;
+                        }
+                    }
                 }
-                else
-                {
-                    Path.RemoveNode(Path.NodeCount-1);
-                }
+            }
+            
+            //Follow mouse
+            if (_selectedSegment is not null && _selectedControlPoint is not null)
+            {
+                Segment segment = Path.GetSegment(_selectedSegment.Value);
                 
-                _selectedNode = null;
-                Selection.activeObject = null;
+                Vector3 currentPostion = segment.GetControlPoint(_selectedControlPoint.Value);
+
+                if (currentPostion != hit.point)
+                {
+                    Debug.Log("Selected segment" + _selectedSegment);
+                    Debug.Log("Controlpoint count: " + segment.ControlPointAmount);
+                    Debug.Log("Selected Control point:" + _selectedControlPoint);
+                    
+                    segment.SetControlPoint(_selectedControlPoint.Value, hit.point);
+                }
             }
         }
 
 
         
-        private void CreateNewNode()
+        private void CreateSegment(Vector3? firstPoint = null)
         {
-            Path.AddNode(Vector3.zero);
-            _selectedNode = Path.NodeCount-1;
-            _originalPosition = null;
+            Segment segment = new Segment();
+            
+            if (firstPoint is not null)
+            {
+                segment.AddControlPoint(firstPoint.Value);
+            }
+            
+            segment.AddControlPoint(Vector3.zero);
+            
+            Path.AddSegment(segment);
+
+            _selectedSegment = Path.SegmentAmount-1;
+            _selectedControlPoint = segment.ControlPointAmount-1;
+
         }
     }
 }
