@@ -6,31 +6,22 @@ public class Path : MonoBehaviour
 {
     private Segment[] _segments = Array.Empty<Segment>();
     
-    
     public int SegmentAmount
         => _segments.Length;
     
     public Segment GetSegment(int index)
         => _segments[index];
-
+    
     public void AddSegment(Segment segment)
     {
         Array.Resize(ref _segments, _segments.Length+1);
-        _segments[_segments.Length - 1] = segment;
+        _segments[_segments.Length-1] = segment;
     }
     
-    
-    void OnDrawGizmos()
+    public void RemoveSegment(int index)
     {
-        for (int i = 0; i < _segments.Length; i++)
-        {
-            Segment segment = _segments[i];
-
-            if (segment is not ICurvedSegment curvedSegment && segment.ControlPointAmount == 2)
-            {
-                Gizmos.DrawLine(segment.GetControlPoint(0), segment.GetControlPoint(1));   
-            }
-        }
+        Array.Copy(_segments, index + 1, _segments, index, _segments.Length - index - 1);
+        Array.Resize(ref _segments, _segments.Length - 1);
     }
     
 }
