@@ -37,10 +37,4 @@ public class Segment
         Array.Resize(ref ControlPoints, ControlPoints.Length + 1);
         ControlPoints[ControlPoints.Length - 1] = node;
     }
-
-    public void RemoveControlPoint(int index)
-    {
-        Array.Copy(ControlPoints, index + 1, ControlPoints, index, ControlPoints.Length - index - 1);
-        Array.Resize(ref ControlPoints, ControlPoints.Length - 1);
-    }
 }
