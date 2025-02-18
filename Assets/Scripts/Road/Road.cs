@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using Model;
-using Road;
+using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
@@ -44,43 +46,35 @@ namespace RoadComponent
             }
             
             //Handle change
+            List<Node> nodes = new();
+
             for (int s = 0; s < _path.SegmentAmount; s++)
             {
                 Segment selectedSegment = _path.GetSegment(s);
-                Node[] points;
-                
-                if(!selectedSegment.IsCompleted)
-                    return;
-                
-                
+
                 if (selectedSegment is CurvedSegment curvedSegment)
                 {
-
-                    points = new Node[curvedSegment.NodeAmount];
-                    for (int i = 0; i < curvedSegment.NodeAmount; i++)
+                    for (int n = 0; n < curvedSegment.NodeAmount; n++)
                     {
-                        points[i] = curvedSegment.GetNode(i);
+                        nodes.Add(curvedSegment.GetNode(n));
                     }
-                    
                 }
                 else
                 {
-                    points = new[]
-                    {
-                        selectedSegment.GetControlPoint(0),
-                        selectedSegment.GetControlPoint(1)
-                    };
+                    nodes.Add(selectedSegment.GetControlPoint(0));
+                    nodes.Add(selectedSegment.GetControlPoint(1));
                 }
                 
-                
-                GenerateWaypoints(points);
-
-                if (!oneWay)
-                {
-                    Array.Reverse(points);
-                    GenerateWaypoints(points, true);
-                }
             }
+            
+            GenerateWaypoints(nodes.ToArray());
+
+            if (!oneWay)
+            {
+                nodes.Reverse();
+                GenerateWaypoints(nodes.ToArray(), true);
+            }
+            
         }
 
 
@@ -89,14 +83,14 @@ namespace RoadComponent
             
             for (int i = 0; i < laneCount; i++)
             {
-                
+
                 Waypoint? previousPoint = null;
                 
                 
                 for (int p = 0; p < points.Length; p++)
                 {
                     Vector3 newPosition = points[p].transform.TransformPoint(
-                        (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + laneWidth * i));
+                        (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + (laneWidth*i) ));
                     
                     
 
@@ -115,34 +109,6 @@ namespace RoadComponent
                     previousPoint = wp;
                     
                 }
-            }
-        }
-
-
-        private void OnDrawGizmos()
-        {
-            for (int i = 0; i < _path.SegmentAmount; i++)
-            {
-                var selected = _path.GetSegment(i);
-
-                if (!selected.IsCompleted) return;
-         
-                
-                Gizmos.color = Color.magenta;
-                if (selected is CurvedSegment segment)
-                {
-                    for (int j = 0; j < segment.NodeAmount; j++)
-                    {
-                        Gizmos.DrawSphere(segment.GetNode(j).GetPosition(), 0.5f);
-                    }
-                }
-                else
-                {
-                    Gizmos.DrawSphere(selected.GetControlPoint(0).GetPosition(), 0.5f);
-                    Gizmos.DrawSphere(selected.GetControlPoint(1).GetPosition(), 0.5f);
-
-                }
-
             }
         }
     }

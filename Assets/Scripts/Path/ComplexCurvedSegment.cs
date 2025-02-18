@@ -25,7 +25,7 @@ public class  ComplexCurvedSegment : SimpleCurvedSegment
         else if (ControlPointAmount == MaxControlPoints)
         {
            
-            Nodes = Array.Empty<Node>();
+            Nodes = Array.Empty<Node>(); 
             DestroyNodes();
             
             for (float t = 0; t <  1; t += 0.05f)
@@ -46,9 +46,10 @@ public class  ComplexCurvedSegment : SimpleCurvedSegment
                 Vector3 position = Vector3.Lerp(p1, p2, t);
                 
                 AddNode(Node.Create(position, _nodeParent));
-                
             }
             
+            
+            GetNode(NodeAmount-1).transform.LookAt(GetControlPoint(ControlPointAmount-1).GetPosition());
         }
         
         Debug.Log("NodeCount: " + NodeAmount);

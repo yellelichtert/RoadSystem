@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Model;
 using UnityEngine;
 
@@ -19,23 +20,30 @@ public abstract class CurvedSegment : Segment
     {
         base.SetControlPoint(index, position);
         GenerateSegment();
+        
     }
             
     public Node GetNode(int index)
         => Nodes[index];
 
-    protected abstract void GenerateSegment();
+    protected virtual void GenerateSegment()
+        => GetNode(NodeAmount).transform.LookAt(GetControlPoint(ControlPointAmount).GetPosition());
+    
 
-    protected void DestroyNodes()
+    protected async void DestroyNodes()
     {
         if (_nodeParent.childCount == 0) return;
         
         Debug.Log("Destroying nodes....");
-        
-        for (int i = 0; i < _nodeParent.childCount; i++)
+
+        await Task.Run(() =>
         {
-            UnityEngine.Object.DestroyImmediate(_nodeParent.GetChild(i).gameObject);
-        }
+            for (int i = 0; i < _nodeParent.childCount; i++)
+            {
+                UnityEngine.Object.DestroyImmediate(_nodeParent.GetChild(i).gameObject);
+            }
+        });
+        
         
         Debug.Log("Nodes destroyed... new count: " + _nodeParent.childCount);
     }

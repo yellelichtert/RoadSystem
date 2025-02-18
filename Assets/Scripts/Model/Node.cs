@@ -21,9 +21,5 @@ namespace Model
             
             return node;
         }
-
-
-        public void Destroy()
-            => DestroyImmediate(gameObject);
     }
 }

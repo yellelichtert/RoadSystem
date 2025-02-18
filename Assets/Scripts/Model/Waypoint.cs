@@ -1,8 +1,7 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Road
+namespace Model
 {
     public class Waypoint : MonoBehaviour
     {

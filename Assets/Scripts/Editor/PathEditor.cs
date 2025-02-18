@@ -136,7 +136,7 @@ namespace Editor
                 else if (segment is CurvedSegment curvedSegment)
                 {
                     Vector3 previousNode = segment.GetControlPoint(0).GetPosition();
-
+            
                     for (int j = 0; j < curvedSegment.NodeAmount; j++)
                     {
                         Vector3 currentPosition = curvedSegment.GetNode(j).GetPosition();

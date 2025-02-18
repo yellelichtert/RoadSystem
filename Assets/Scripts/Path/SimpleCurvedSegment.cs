@@ -18,16 +18,15 @@ public class SimpleCurvedSegment : CurvedSegment
         Array.Resize(ref Nodes, Nodes.Length + 1);
         Nodes[NodeAmount - 1] = node;
 
-        if (NodeAmount > 2)
+        if (NodeAmount > 1)
         {
             GetNode(NodeAmount-2).transform.LookAt(node.GetPosition());
         }
     }
 
     protected override void GenerateSegment()
-    {
+    {   
         if (ControlPointAmount < 3) return;
-        
         
         Nodes = Array.Empty<Node>();
         DestroyNodes();
@@ -43,6 +42,8 @@ public class SimpleCurvedSegment : CurvedSegment
             Debug.Log("Creating node: #" + t);
             
             AddNode(Node.Create(position, _nodeParent));
+            
+            GetNode(NodeAmount-1).transform.LookAt(GetControlPoint(ControlPointAmount-1).GetPosition());
         }
     }
     

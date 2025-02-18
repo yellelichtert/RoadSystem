@@ -23,7 +23,7 @@ public class Segment
 
         if (ControlPointAmount > 1)
         {
-            GetControlPoint(ControlPointAmount-2)
+            GetControlPoint(index-1)
                 .transform.LookAt(position);
         }
     }
