@@ -26,26 +26,6 @@ public abstract class CurvedSegment : Segment
     public Node GetNode(int index)
         => Nodes[index];
 
-    protected virtual void GenerateSegment()
-        => GetNode(NodeAmount).transform.LookAt(GetControlPoint(ControlPointAmount).GetPosition());
-    
-
-    protected async void DestroyNodes()
-    {
-        if (_nodeParent.childCount == 0) return;
-        
-        Debug.Log("Destroying nodes....");
-
-        await Task.Run(() =>
-        {
-            for (int i = 0; i < _nodeParent.childCount; i++)
-            {
-                UnityEngine.Object.DestroyImmediate(_nodeParent.GetChild(i).gameObject);
-            }
-        });
-        
-        
-        Debug.Log("Nodes destroyed... new count: " + _nodeParent.childCount);
-    }
+    protected abstract void GenerateSegment();
     
 }

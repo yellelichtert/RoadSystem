@@ -26,7 +26,6 @@ public class  ComplexCurvedSegment : SimpleCurvedSegment
         {
            
             Nodes = Array.Empty<Node>(); 
-            DestroyNodes();
             
             for (float t = 0; t <  1; t += 0.05f)
             {

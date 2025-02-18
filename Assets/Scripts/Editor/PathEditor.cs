@@ -118,38 +118,38 @@ namespace Editor
             
             
             
-            //Draw lines
-            for (int i = 0; i < Path.SegmentAmount; i++)
-            {
-                Segment segment = Path.GetSegment(i);
-                
-                if (segment.ControlPointAmount == 1) return;
-                
-                if (segment.ControlPointAmount == 2)
-                {
-                    
-                    Handles.DrawLine(
-                        segment.GetControlPoint(0).GetPosition(),
-                        segment.GetControlPoint(1).GetPosition());
-                    
-                }
-                else if (segment is CurvedSegment curvedSegment)
-                {
-                    Vector3 previousNode = segment.GetControlPoint(0).GetPosition();
+            // Draw lines
+             for (int i = 0; i < Path.SegmentAmount; i++)
+             {
+                 Segment segment = Path.GetSegment(i);
+                 
+                 if (segment.ControlPointAmount == 1) return;
+                 
+                 if (segment.ControlPointAmount == 2)
+                 {
+                     
+                     Handles.DrawLine(
+                         segment.GetControlPoint(0).GetPosition(),
+                         segment.GetControlPoint(1).GetPosition());
+                     
+                 }
+                 else if (segment is CurvedSegment curvedSegment)
+                 {
+                     Vector3 previousNode = segment.GetControlPoint(0).GetPosition();
             
-                    for (int j = 0; j < curvedSegment.NodeAmount; j++)
-                    {
-                        Vector3 currentPosition = curvedSegment.GetNode(j).GetPosition();
-                        
-                        Handles.DrawLine(currentPosition, previousNode);
-                        previousNode = currentPosition;
-                    }
-                    
-                    Vector3 lastControlPoint = segment.GetControlPoint(segment.ControlPointAmount-1).GetPosition();
-                    Handles.DrawLine(lastControlPoint, previousNode);
-                    
-                }
-            }
+                     for (int j = 0; j < curvedSegment.NodeAmount; j++)
+                     {
+                         Vector3 currentPosition = curvedSegment.GetNode(j).GetPosition();
+                         
+                         Handles.DrawLine(currentPosition, previousNode);
+                         previousNode = currentPosition;
+                     }
+                     
+                     Vector3 lastControlPoint = segment.GetControlPoint(segment.ControlPointAmount-1).GetPosition();
+                     Handles.DrawLine(lastControlPoint, previousNode);
+                     
+                 }
+             }
             
         }
 
@@ -182,7 +182,6 @@ namespace Editor
                 Path.RemoveSegment(_selectedSegment.Value);
                 
             }
-            
             
             segment.AddControlPoint(Node.Create(Vector3.zero, Path.ControlPoints));
             
