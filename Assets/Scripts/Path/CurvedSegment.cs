@@ -19,5 +19,5 @@ public abstract class CurvedSegment : Segment
         => Nodes[index];
 
     protected abstract void GenerateSegment();
-            
+    
 }

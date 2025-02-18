@@ -46,28 +46,38 @@ namespace RoadComponent
             for (int s = 0; s < _path.SegmentAmount; s++)
             {
                 Segment selectedSegment = _path.GetSegment(s);
-
+                Vector3[] points;
+                
+                if(!selectedSegment.IsCompleted)
+                    return;
+                
+                
                 if (selectedSegment is CurvedSegment curvedSegment)
                 {
-                    Debug.Log("Curved Segment Handle");
+
+                    points = new Vector3[curvedSegment.NodeAmount];
+                    for (int i = 0; i < curvedSegment.NodeAmount; i++)
+                    {
+                        points[i] = curvedSegment.GetNode(i);
+                    }
+                    
                 }
                 else
                 {
-                    if (!selectedSegment.IsCompleted) return;
-
-                    Vector3[] points = new[]
+                    points = new[]
                     {
                         selectedSegment.GetControlPoint(0),
                         selectedSegment.GetControlPoint(1)
                     };
-                    
-                    GenerateWaypoints(points);
+                }
+                
+                
+                GenerateWaypoints(points);
 
-                    if (!oneWay)
-                    {
-                        Array.Reverse(points);
-                        GenerateWaypoints(points, true);
-                    }
+                if (!oneWay)
+                {
+                    Array.Reverse(points);
+                    GenerateWaypoints(points, true);
                 }
             }
         }
@@ -110,7 +120,34 @@ namespace RoadComponent
                     
                 }
             }
-            
+        }
+
+
+        private void OnDrawGizmos()
+        {
+            for (int i = 0; i < _path.SegmentAmount; i++)
+            {
+                var selected = _path.GetSegment(i);
+
+                if (!selected.IsCompleted) return;
+         
+                
+                Gizmos.color = Color.magenta;
+                if (selected is CurvedSegment segment)
+                {
+                    for (int j = 0; j < segment.NodeAmount; j++)
+                    {
+                        Gizmos.DrawSphere(segment.GetNode(j), 0.5f);
+                    }
+                }
+                else
+                {
+                    Gizmos.DrawSphere(selected.GetControlPoint(0), 0.5f);
+                    Gizmos.DrawSphere(selected.GetControlPoint(1), 0.5f);
+
+                }
+
+            }
         }
     }
 }
