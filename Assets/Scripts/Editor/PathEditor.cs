@@ -108,6 +108,7 @@ namespace Editor
                 if (currentPostion != hit.point)
                 {
                     segment.SetControlPoint(_selectedControlPoint.Value, hit.point);
+                    Path.PathChanged?.Invoke();
                 }
                 
             }
@@ -125,7 +126,7 @@ namespace Editor
                 {
                     Handles.DrawLine(segment.GetControlPoint(0), segment.GetControlPoint(1));
                 }
-                else if (segment is CruvedSegment curvedSegment)
+                else if (segment is CurvedSegment curvedSegment)
                 {
                     Vector3 previousNode = segment.GetControlPoint(0);
 

@@ -1,9 +1,10 @@
 using System;
-using UnityEditor;
 using UnityEngine;
 
 public class Path : MonoBehaviour
 {
+    public Action PathChanged;
+    
     private Segment[] _segments = Array.Empty<Segment>();
     
     public int SegmentAmount

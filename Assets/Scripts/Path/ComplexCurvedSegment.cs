@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class ComplexCurvedSegment : SimpleCurvedSegment
+public class  ComplexCurvedSegment : SimpleCurvedSegment
 {
     public ComplexCurvedSegment()
         => MaxControlPoints = 4;

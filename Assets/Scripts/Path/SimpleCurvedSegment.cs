@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class SimpleCurvedSegment : CruvedSegment
+public class SimpleCurvedSegment : CurvedSegment
 {
     protected int MaxControlPoints;
 
