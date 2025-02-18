@@ -1,9 +1,10 @@
 ﻿using System;
+using Model;
 using UnityEngine;
 
 public class  ComplexCurvedSegment : SimpleCurvedSegment
 {
-    public ComplexCurvedSegment()
+    public ComplexCurvedSegment(Transform nodeParent) : base(nodeParent) 
         => MaxControlPoints = 4;
     
     
@@ -12,6 +13,8 @@ public class  ComplexCurvedSegment : SimpleCurvedSegment
     {
         if (ControlPointAmount < 3) return;
 
+        
+        Debug.Log("Generating nodes....");
         
         if (ControlPointAmount < MaxControlPoints)
         {
@@ -22,27 +25,33 @@ public class  ComplexCurvedSegment : SimpleCurvedSegment
         else if (ControlPointAmount == MaxControlPoints)
         {
            
-            Nodes = Array.Empty<Vector3>();
+            Nodes = Array.Empty<Node>();
+            DestroyNodes();
             
             for (float t = 0; t <  1; t += 0.05f)
             {
                 
                 Vector3 p1 = CalculateQuadraticBezierPoint(t,
-                    GetControlPoint(0),
-                    GetControlPoint(1),
-                    GetControlPoint(2));
+                    GetControlPoint(0).GetPosition(),
+                    GetControlPoint(1).GetPosition(),
+                    GetControlPoint(2).GetPosition()
+                    );
                 
                 Vector3 p2 = CalculateQuadraticBezierPoint(t,
-                    GetControlPoint(0),
-                    GetControlPoint(2),
-                    GetControlPoint(3));
-
-                Vector3 node = Vector3.Lerp(p1, p2, t);
+                    GetControlPoint(0).GetPosition(),
+                    GetControlPoint(2).GetPosition(),
+                    GetControlPoint(3).GetPosition()
+                    );
                 
-                AddNode(node);
+                Vector3 position = Vector3.Lerp(p1, p2, t);
+                
+                AddNode(Node.Create(position, _nodeParent));
                 
             }
             
         }
+        
+        Debug.Log("NodeCount: " + NodeAmount);
+        
     }
 }

@@ -1,36 +1,46 @@
 ﻿using System;
+using Model;
 using UnityEngine;
 
 public class Segment
 {
     private const int MaxControlPoints = 2;
 
-    private Vector3[] _controlPoints = Array.Empty<Vector3>();
+    protected Node[] ControlPoints = Array.Empty<Node>();
 
     public bool IsCompleted
         => GetMaxControlPoints() == ControlPointAmount;
 
     public int ControlPointAmount
-        => _controlPoints.Length;
+        => ControlPoints.Length;
 
-    public Vector3 GetControlPoint(int index)
-        => _controlPoints[index];
+    public Node GetControlPoint(int index)
+        => ControlPoints[index];
 
     public virtual void SetControlPoint(int index, Vector3 position)
-        => _controlPoints[index] = position;
+    {
+        ControlPoints[index].SetPosition(position);
+
+        if (ControlPointAmount > 1)
+        {
+            GetControlPoint(ControlPointAmount-2)
+                .transform.LookAt(position);
+        }
+    }
+        
 
     public virtual int GetMaxControlPoints()
         => MaxControlPoints;
 
-    public void AddControlPoint(Vector3 position)
+    public void AddControlPoint(Node node)
     {
-        Array.Resize(ref _controlPoints, _controlPoints.Length + 1);
-        _controlPoints[_controlPoints.Length - 1] = position;
+        Array.Resize(ref ControlPoints, ControlPoints.Length + 1);
+        ControlPoints[ControlPoints.Length - 1] = node;
     }
 
     public void RemoveControlPoint(int index)
     {
-        Array.Copy(_controlPoints, index + 1, _controlPoints, index, _controlPoints.Length - index - 1);
-        Array.Resize(ref _controlPoints, _controlPoints.Length - 1);
+        Array.Copy(ControlPoints, index + 1, ControlPoints, index, ControlPoints.Length - index - 1);
+        Array.Resize(ref ControlPoints, ControlPoints.Length - 1);
     }
 }

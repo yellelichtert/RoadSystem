@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
+using Model;
 using Road;
 using UnityEditor;
 using UnityEngine;
@@ -46,7 +47,7 @@ namespace RoadComponent
             for (int s = 0; s < _path.SegmentAmount; s++)
             {
                 Segment selectedSegment = _path.GetSegment(s);
-                Vector3[] points;
+                Node[] points;
                 
                 if(!selectedSegment.IsCompleted)
                     return;
@@ -55,7 +56,7 @@ namespace RoadComponent
                 if (selectedSegment is CurvedSegment curvedSegment)
                 {
 
-                    points = new Vector3[curvedSegment.NodeAmount];
+                    points = new Node[curvedSegment.NodeAmount];
                     for (int i = 0; i < curvedSegment.NodeAmount; i++)
                     {
                         points[i] = curvedSegment.GetNode(i);
@@ -83,7 +84,7 @@ namespace RoadComponent
         }
 
 
-        private void GenerateWaypoints(Vector3[] points, bool left = false)
+        private void GenerateWaypoints(Node[] points, bool left = false)
         {
             
             for (int i = 0; i < laneCount; i++)
@@ -94,20 +95,15 @@ namespace RoadComponent
                 
                 for (int p = 0; p < points.Length; p++)
                 {
+                    Vector3 newPosition = points[p].transform.TransformPoint(
+                        (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + laneWidth * i));
                     
-                    Vector3 position = new Vector3(
-                        points[p].x,
-                        points[p].y,
-                        left ? 
-                            points[p].z + (laneWidth / 2) + (laneWidth * i) :
-                            points[p].z - (laneWidth / 2) - (laneWidth * i) 
-                            
-                    );
+                    
 
                     Waypoint wp = new GameObject($"Waypoint #{_waypoints.childCount}")
                         .AddComponent<Waypoint>();
 
-                    wp.transform.position = position;
+                    wp.transform.position = newPosition;
                     wp.transform.parent = _waypoints;
 
                     if (previousPoint)
@@ -137,13 +133,13 @@ namespace RoadComponent
                 {
                     for (int j = 0; j < segment.NodeAmount; j++)
                     {
-                        Gizmos.DrawSphere(segment.GetNode(j), 0.5f);
+                        Gizmos.DrawSphere(segment.GetNode(j).GetPosition(), 0.5f);
                     }
                 }
                 else
                 {
-                    Gizmos.DrawSphere(selected.GetControlPoint(0), 0.5f);
-                    Gizmos.DrawSphere(selected.GetControlPoint(1), 0.5f);
+                    Gizmos.DrawSphere(selected.GetControlPoint(0).GetPosition(), 0.5f);
+                    Gizmos.DrawSphere(selected.GetControlPoint(1).GetPosition(), 0.5f);
 
                 }
 

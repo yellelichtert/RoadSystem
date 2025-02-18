@@ -1,4 +1,5 @@
 using System;
+using Model;
 using UnityEditor;
 using UnityEngine;
 
@@ -77,7 +78,7 @@ namespace Editor
                 
                 for (int j = 0; j < segment.ControlPointAmount; j++)
                 {
-                    Vector3 controlPoint = segment.GetControlPoint(j);
+                    Vector3 controlPoint = segment.GetControlPoint(j).GetPosition();
                     
                     if (Handles.Button(controlPoint, Quaternion.identity, 0.5f, 0.5f,  Handles.DotHandleCap))
                     {
@@ -89,7 +90,10 @@ namespace Editor
                         }
                         else if (isCurrentlySelected)
                         {
-                            segment.AddControlPoint(hit.point);
+                            Node node = Node.Create(hit.point, Path.ControlPoints); 
+                            segment.AddControlPoint(node);
+                            
+                            
                             _selectedControlPoint = segment.ControlPointAmount-1;
                         }
                     }
@@ -103,14 +107,13 @@ namespace Editor
                 
                 Segment segment = Path.GetSegment(_selectedSegment.Value);
                 
-                Vector3 currentPostion = segment.GetControlPoint(_selectedControlPoint.Value);
+                Node currentNode = segment.GetControlPoint(_selectedControlPoint.Value);
 
-                if (currentPostion != hit.point)
+                if (currentNode.GetPosition() != hit.point)
                 {
                     segment.SetControlPoint(_selectedControlPoint.Value, hit.point);
                     Path.PathChanged?.Invoke();
                 }
-                
             }
             
             
@@ -124,21 +127,25 @@ namespace Editor
                 
                 if (segment.ControlPointAmount == 2)
                 {
-                    Handles.DrawLine(segment.GetControlPoint(0), segment.GetControlPoint(1));
+                    
+                    Handles.DrawLine(
+                        segment.GetControlPoint(0).GetPosition(),
+                        segment.GetControlPoint(1).GetPosition());
+                    
                 }
                 else if (segment is CurvedSegment curvedSegment)
                 {
-                    Vector3 previousNode = segment.GetControlPoint(0);
+                    Vector3 previousNode = segment.GetControlPoint(0).GetPosition();
 
                     for (int j = 0; j < curvedSegment.NodeAmount; j++)
                     {
-                        Vector3 currentNode = curvedSegment.GetNode(j);
+                        Vector3 currentPosition = curvedSegment.GetNode(j).GetPosition();
                         
-                        Handles.DrawLine(currentNode, previousNode);
-                        previousNode = currentNode;
+                        Handles.DrawLine(currentPosition, previousNode);
+                        previousNode = currentPosition;
                     }
                     
-                    Vector3 lastControlPoint = segment.GetControlPoint(segment.ControlPointAmount-1);
+                    Vector3 lastControlPoint = segment.GetControlPoint(segment.ControlPointAmount-1).GetPosition();
                     Handles.DrawLine(lastControlPoint, previousNode);
                     
                 }
@@ -154,15 +161,16 @@ namespace Editor
             Segment segment = _selectedSegmentType switch
             {
                 SegmentType.Straight => new Segment(),
-                SegmentType.Curved => new SimpleCurvedSegment(),
-                SegmentType.ComplexCurved => new ComplexCurvedSegment(),
+                SegmentType.Curved => new SimpleCurvedSegment(Path.Nodes),
+                SegmentType.ComplexCurved => new ComplexCurvedSegment(Path.Nodes),
                 _ => throw new ArgumentOutOfRangeException()
             };
 
+            
             if (_selectedSegment is not null && Path.GetSegment(_selectedSegment.Value).IsCompleted)
             {
                 
-                Vector3 lastcontrolPoint = Path.GetSegment(_selectedSegment.Value)
+                Node lastcontrolPoint = Path.GetSegment(_selectedSegment.Value)
                     .GetControlPoint(Path.GetSegment(_selectedSegment.Value).ControlPointAmount-1);
                 
                 segment.AddControlPoint(lastcontrolPoint);
@@ -175,7 +183,8 @@ namespace Editor
                 
             }
             
-            segment.AddControlPoint(Vector3.zero);
+            
+            segment.AddControlPoint(Node.Create(Vector3.zero, Path.ControlPoints));
             
             Path.AddSegment(segment);
 

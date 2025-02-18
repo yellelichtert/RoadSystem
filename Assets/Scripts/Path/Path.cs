@@ -1,12 +1,26 @@
 using System;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class Path : MonoBehaviour
 {
     public Action PathChanged;
     
     private Segment[] _segments = Array.Empty<Segment>();
-    
+
+    public Transform Nodes { get; private set; }
+    public Transform ControlPoints { get; private set; }
+
+    private void Awake()
+    {
+        Nodes = new GameObject("Nodes").transform;
+        Nodes.SetParent(transform);
+        
+        ControlPoints = new GameObject("Control points").transform;
+        ControlPoints.SetParent(transform);
+    }
+
+
     public int SegmentAmount
         => _segments.Length;
     

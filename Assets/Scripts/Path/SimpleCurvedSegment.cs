@@ -1,37 +1,48 @@
 ﻿using System;
+using Model;
 using UnityEngine;
 
 public class SimpleCurvedSegment : CurvedSegment
 {
     protected int MaxControlPoints;
 
-    public SimpleCurvedSegment()
+    public SimpleCurvedSegment(Transform nodeParent) : base(nodeParent) 
         => MaxControlPoints = 3;
 
 
     public override int GetMaxControlPoints()
         => MaxControlPoints;
     
-    protected void AddNode(Vector3 node)
+    protected void AddNode(Node node)
     {
         Array.Resize(ref Nodes, Nodes.Length + 1);
-        Nodes[Nodes.Length - 1] = node;
+        Nodes[NodeAmount - 1] = node;
+
+        if (NodeAmount > 2)
+        {
+            GetNode(NodeAmount-2).transform.LookAt(node.GetPosition());
+        }
     }
 
     protected override void GenerateSegment()
     {
         if (ControlPointAmount < 3) return;
         
-        Nodes = Array.Empty<Vector3>();
+        
+        Nodes = Array.Empty<Node>();
+        DestroyNodes();
         
         for (float t = 0; t < 1; t += 0.05f)
         {
-            Vector3 node = CalculateQuadraticBezierPoint(t,
-                GetControlPoint(0), 
-                GetControlPoint(1), 
-                GetControlPoint(2));
+            Vector3 position = CalculateQuadraticBezierPoint(t,
+                GetControlPoint(0).GetPosition(),
+                GetControlPoint(1).GetPosition(),
+                GetControlPoint(2).GetPosition()
+                );
             
-            AddNode(node);
+            Debug.Log("Creating node: #" + t);
+            
+            AddNode(Node.Create(position, _nodeParent));
         }
     }
     
