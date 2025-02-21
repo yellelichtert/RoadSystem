@@ -20,6 +20,8 @@ namespace RoadComponent
         
         private void Awake()
         {
+            transform.position = Vector3.zero;
+            
             _path = new GameObject("Path")
                 .AddComponent<Path>();
             
@@ -36,7 +38,6 @@ namespace RoadComponent
             
             
             _path.PathChanged += PathChanged;
-            
         }
 
         
@@ -160,17 +161,20 @@ namespace RoadComponent
             _mesh.vertices = vertices.ToArray();
             _mesh.triangles = triangles.ToArray();
             
+            
 
             void GenerateQuad(Node start, Node end)
             {
                 if (vertices.Count == 0)
                 {
-                    vertices.Add(start.transform.TransformPoint((Vector3.right * laneWidth) * laneCount));
-                    vertices.Add(start.transform.TransformPoint((Vector3.left * laneWidth) * laneCount));
+                    
+                    vertices.Add(start.transform.TransformPoint(((Vector3.right * laneWidth) * laneCount) +(Vector3.up *0.01f)));
+                    vertices.Add(start.transform.TransformPoint(((Vector3.left * laneWidth) * laneCount) +(Vector3.up *0.01f)));
+                    
                 }
                 
-                vertices.Add(end.transform.TransformPoint((Vector3.right * laneWidth) * laneCount));
-                vertices.Add(end.transform.TransformPoint((Vector3.left * laneWidth) * laneCount));
+                vertices.Add(end.transform.TransformPoint(((Vector3.right * laneWidth) * laneCount) +(Vector3.up *0.1f)));
+                vertices.Add(end.transform.TransformPoint(((Vector3.left * laneWidth) * laneCount) +(Vector3.up *0.01f)));
                 
                 
                 triangles.AddRange(new []
