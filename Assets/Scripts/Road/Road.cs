@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Model;
+using Structs;
 using UnityEngine;
 
 namespace RoadComponent
@@ -8,6 +10,8 @@ namespace RoadComponent
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class Road : MonoBehaviour
     {
+        [SerializeField] public RoadProperties properties = new();
+        
         
         [SerializeField] private int laneCount = 1;
         [SerializeField] private float laneWidth = 8;
@@ -15,7 +19,9 @@ namespace RoadComponent
         
         
         private Path _path;
-        private Transform _waypoints;
+
+        private List<Waypoint> _waypoints = new();
+        // private Transform _waypoints;
         private Mesh _mesh;
         
         private void Awake()
@@ -28,10 +34,10 @@ namespace RoadComponent
             _path.transform.SetParent(transform);
 
             
-            _waypoints = new GameObject("-Waypoints-")
-                .transform;
-            
-            _waypoints.SetParent(transform);
+            // _waypoints = new GameObject("-Waypoints-")
+            //     .transform;
+            //
+            // _waypoints.SetParent(transform);
 
             _mesh = new Mesh() { name = "RoadMesh" };
             GetComponent<MeshFilter>().mesh = _mesh;
@@ -44,18 +50,21 @@ namespace RoadComponent
         
         private void PathChanged()
         {
-            //Clear existing waypoints
-            for (int i = 0; i < _waypoints.childCount; i++)
-            {
-                DestroyImmediate(_waypoints.GetChild(i).gameObject);
-            }
+            // //Clear existing waypoints
+            // for (int i = 0; i < _waypoints.childCount; i++)
+            // {
+            //     DestroyImmediate(_waypoints.GetChild(i).gameObject);
+            // }
             
             //Handle change
             List<Node> nodes = new();
+            _waypoints = new();
 
             for (int s = 0; s < _path.SegmentAmount; s++)
             {
                 Segment selectedSegment = _path.GetSegment(s);
+
+                if (selectedSegment.ControlPointAmount < 2) return;
 
                 if (selectedSegment is CurvedSegment curvedSegment)
                 {
@@ -99,23 +108,20 @@ namespace RoadComponent
                 {
                     Vector3 newPosition = points[p].transform.TransformPoint(
                         (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + (laneWidth*i) ));
+
+
+
+                    Waypoint wp = new Waypoint(newPosition);
+                    _waypoints.Add(wp);
                     
-                    
 
-                    Waypoint wp = new GameObject($"Waypoint #{_waypoints.childCount}")
-                        .AddComponent<Waypoint>();
-
-                    wp.transform.position = newPosition;
-                    wp.transform.parent = _waypoints;
-
-                    if (previousPoint)
+                    if (previousPoint is not null)
                     {
-                        wp.SetPreviousPoint(previousPoint);
-                        previousPoint.SetNextPoint(wp);
+                        wp.PreviousWaypoint = previousPoint;
+                        previousPoint.NextWaypoint = wp;
                     }
-
-                    previousPoint = wp;
                     
+                    previousPoint = wp;
                 }
             }
         }
@@ -124,7 +130,6 @@ namespace RoadComponent
 
         private void GenerateMesh()
         {
-            Debug.Log("Generating mesh");            
             
             List<Vector3> vertices = new();
             List<int> triangles = new();
@@ -186,6 +191,25 @@ namespace RoadComponent
                     vertices.Count-2,
                     vertices.Count-3
                 });
+            }
+        }
+
+
+        private void OnDrawGizmos()
+        {
+            for (int i = 0; i < _waypoints.Count; i++)
+            {
+                Waypoint waypoint = _waypoints[i];
+
+                Gizmos.color = Color.red;
+                Gizmos.DrawSphere(waypoint.Position, 0.5f);
+
+                
+                if (waypoint.PreviousWaypoint is not null)
+                {
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawLine(waypoint.Position, waypoint.PreviousWaypoint.Position);
+                }
             }
         }
     }

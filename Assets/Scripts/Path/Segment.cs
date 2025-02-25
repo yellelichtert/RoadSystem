@@ -37,4 +37,7 @@ public class Segment
         Array.Resize(ref ControlPoints, ControlPoints.Length + 1);
         ControlPoints[ControlPoints.Length - 1] = node;
     }
+
+    public void RemoveLastControlPoint()
+        => Array.Resize(ref ControlPoints, ControlPoints.Length-1);   
 }

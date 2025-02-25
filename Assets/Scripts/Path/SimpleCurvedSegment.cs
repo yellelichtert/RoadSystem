@@ -39,8 +39,6 @@ public class SimpleCurvedSegment : CurvedSegment
                 GetControlPoint(2).GetPosition()
                 );
             
-            Debug.Log("Creating node: #" + t);
-            
             AddNode(Node.Create(position, _nodeParent));
             
             GetNode(NodeAmount-1).transform.LookAt(GetControlPoint(ControlPointAmount-1).GetPosition());

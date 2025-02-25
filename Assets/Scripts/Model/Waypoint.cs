@@ -3,30 +3,17 @@ using UnityEngine;
 
 namespace Model
 {
-    public class Waypoint : MonoBehaviour
+    public class Waypoint
     {
-        [CanBeNull] private Waypoint previousWaypoint;
-        [CanBeNull] private Waypoint nextWaypoint;
-
-        public Vector3 GetPosition()
-            => transform.position;
-
-        public void SetPreviousPoint(Waypoint point)
-            => previousWaypoint = point;
+        public Vector3 Position { get; }
         
-        public void SetNextPoint(Waypoint point)
-            => nextWaypoint = point;
+        [CanBeNull] public Waypoint PreviousWaypoint { get; set; }
+        [CanBeNull] public Waypoint NextWaypoint { get; set; }
         
-        private void OnDrawGizmos()
+        
+        public Waypoint(Vector3 position)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawSphere(GetPosition(), 0.5f);
-
-            if (previousWaypoint != null)
-            {
-                Gizmos.color = Color.blue;
-                Gizmos.DrawLine(GetPosition(), previousWaypoint.GetPosition());
-            }
+            Position = position;
         }
     }
 }

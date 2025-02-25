@@ -35,7 +35,6 @@ public class Path : MonoBehaviour
     
     public void RemoveSegment(int index)
     {
-        
         Segment segment = GetSegment(index);
         for (int i = 0; i < segment.ControlPointAmount; i++)
         {
@@ -53,6 +52,7 @@ public class Path : MonoBehaviour
         
         Array.Copy(_segments, index + 1, _segments, index, _segments.Length - index - 1);
         Array.Resize(ref _segments, _segments.Length - 1);
+        
     }
     
 }

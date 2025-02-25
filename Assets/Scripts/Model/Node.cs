@@ -12,6 +12,7 @@ namespace Model
         public void SetPosition(Vector3 position)
             => transform.position = position;
 
+        
         public static Node Create(Vector3 position, Transform parent)
         {
             Node node = new GameObject($"Node #{parent.childCount}").AddComponent<Node>();
