@@ -5,7 +5,7 @@ namespace Model
 {
     public class Waypoint
     {
-        public Vector3 Position { get; }
+        public Vector3 Position { get;}
         
         [CanBeNull] public Waypoint PreviousWaypoint { get; set; }
         [CanBeNull] public Waypoint NextWaypoint { get; set; }

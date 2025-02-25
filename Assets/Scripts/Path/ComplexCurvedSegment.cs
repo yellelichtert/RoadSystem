@@ -34,17 +34,17 @@ public class  ComplexCurvedSegment : SimpleCurvedSegment
                     GetControlPoint(0).GetPosition(),
                     GetControlPoint(1).GetPosition(),
                     GetControlPoint(2).GetPosition()
-                    );
+                );
                 
                 Vector3 p2 = CalculateQuadraticBezierPoint(t,
                     GetControlPoint(0).GetPosition(),
                     GetControlPoint(2).GetPosition(),
                     GetControlPoint(3).GetPosition()
-                    );
+                );
                 
                 Vector3 position = Vector3.Lerp(p1, p2, t);
                 
-                AddNode(Node.Create(position, _nodeParent));
+                AddNode(Node.Create(position, NodeParent));
             }
             
             

@@ -18,51 +18,41 @@ namespace RoadComponent
         [SerializeField] private bool oneWay;
         
         
-        private Path _path;
-
         private List<Waypoint> _waypoints = new();
-        // private Transform _waypoints;
+
+        public Path Path { get; private set; }
         private Mesh _mesh;
         
         private void Awake()
         {
             transform.position = Vector3.zero;
             
-            _path = new GameObject("Path")
-                .AddComponent<Path>();
-            
-            _path.transform.SetParent(transform);
-
-            
-            // _waypoints = new GameObject("-Waypoints-")
-            //     .transform;
-            //
-            // _waypoints.SetParent(transform);
-
             _mesh = new Mesh() { name = "RoadMesh" };
             GetComponent<MeshFilter>().mesh = _mesh;
+
+            Transform nodes = new GameObject("Nodes").transform;
+            Transform controlPoints = new GameObject("ControlPoints").transform;
+
+            nodes.parent = transform;
+            controlPoints.parent = transform;
+
+            Path = new Path(nodes, controlPoints);
             
-            
-            _path.PathChanged += PathChanged;
+            Path.PathChanged += PathChanged;
         }
 
         
         
         private void PathChanged()
         {
-            // //Clear existing waypoints
-            // for (int i = 0; i < _waypoints.childCount; i++)
-            // {
-            //     DestroyImmediate(_waypoints.GetChild(i).gameObject);
-            // }
-            
+         
             //Handle change
             List<Node> nodes = new();
             _waypoints = new();
 
-            for (int s = 0; s < _path.SegmentAmount; s++)
+            for (int s = 0; s < Path.SegmentAmount; s++)
             {
-                Segment selectedSegment = _path.GetSegment(s);
+                Segment selectedSegment = Path.GetSegment(s);
 
                 if (selectedSegment.ControlPointAmount < 2) return;
 
@@ -106,11 +96,14 @@ namespace RoadComponent
                 
                 for (int p = 0; p < points.Length; p++)
                 {
+                    // Vector3 newPosition = points[p].Position  +(
+                    //     (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + (laneWidth*i) ));
+                    
+                    //Kijken of onderstaande werkt
                     Vector3 newPosition = points[p].transform.TransformPoint(
                         (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + (laneWidth*i) ));
 
-
-
+                    
                     Waypoint wp = new Waypoint(newPosition);
                     _waypoints.Add(wp);
                     
@@ -134,9 +127,9 @@ namespace RoadComponent
             List<Vector3> vertices = new();
             List<int> triangles = new();
             
-            for (int i = 0; i < _path.SegmentAmount; i++)
+            for (int i = 0; i < Path.SegmentAmount; i++)
             {
-                Segment segment = _path.GetSegment(i);
+                Segment segment = Path.GetSegment(i);
 
                 if (segment is CurvedSegment curvedSegment)
                 {
@@ -170,6 +163,8 @@ namespace RoadComponent
 
             void GenerateQuad(Node start, Node end)
             {
+                Debug.Log("Generating quad");
+                
                 if (vertices.Count == 0)
                 {
                     

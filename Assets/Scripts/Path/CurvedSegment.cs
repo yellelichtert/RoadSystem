@@ -5,10 +5,10 @@ using UnityEngine;
 
 public abstract class CurvedSegment : Segment
 {
-    protected Transform _nodeParent;
+    protected Transform NodeParent;
 
     protected CurvedSegment(Transform nodeParent)
-        => _nodeParent = nodeParent;
+        => NodeParent = nodeParent;
     
     protected Node[] Nodes = Array.Empty<Node>();
             

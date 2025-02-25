@@ -1,14 +1,15 @@
 using System;
 using Model;
+using RoadComponent;
 using UnityEditor;
 using UnityEngine;
 
 namespace Editor
 {
-    [CustomEditor(typeof(Path))]
+    [CustomEditor(typeof(Road))]
     public class PathEditor : UnityEditor.Editor
     {
-        private Path Path => (Path)target;
+        private Path Path => ((Road)target).Path;
         
         
         private SegmentType _selectedSegmentType;
@@ -83,12 +84,8 @@ namespace Editor
                     if (Handles.Button(controlPoint, Quaternion.identity, 0.5f, 0.5f,  Handles.DotHandleCap))
                     {
                         bool isCurrentlySelected = _selectedSegment == i && _selectedControlPoint == j;
-
-                        if (segment.IsCompleted && e.shift)
-                        {
-                            Selection.activeObject = null;
-                        }
-                        else if (segment.IsCompleted)
+                        
+                        if (segment.ControlPointAmount == segment.GetMaxControlPoints())
                         {
                             CreateSegment();
                         }
@@ -104,8 +101,6 @@ namespace Editor
                 }
             }
             
-            
-
             
             //Follow mouse
             if (_selectedSegment is not null && _selectedControlPoint is not null)
@@ -156,39 +151,11 @@ namespace Editor
                      
                  }
              }
-             
-             
-             
-             //handle backspace
-             if (_selectedSegment is not null && e.isKey &&  e.keyCode == KeyCode.Backspace)
-             {
-                 Segment segment = Path.GetSegment(_selectedSegment.Value);
-                
-                 if (segment.ControlPointAmount > 2)
-                 {
-                     segment.RemoveLastControlPoint();
-
-                     _selectedControlPoint = segment.ControlPointAmount-1;
-                 }
-                 else
-                 {
-                     Path.RemoveSegment(_selectedSegment.Value);
-
-                     _selectedSegment -= 1;
-                     _selectedControlPoint = Path.GetSegment(_selectedSegment.Value).ControlPointAmount - 1;
-                    
-                     Debug.Log("Selected segment: " + _selectedSegment);
-                     Debug.Log("Segment amount: " + Path.SegmentAmount);
-                    
-                     Debug.Log("Selected controlpoints: " + _selectedControlPoint);
-                     Debug.Log("Controlpoint amount: " + Path.GetSegment(_selectedSegment.Value).ControlPointAmount );
-                 }
-             }
             
         }
 
-        
-        
+
+
 
         private void CreateSegment()
         {

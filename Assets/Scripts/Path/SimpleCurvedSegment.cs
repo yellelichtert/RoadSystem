@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SimpleCurvedSegment : CurvedSegment
 {
-    protected int MaxControlPoints;
+    protected new int MaxControlPoints;
 
     public SimpleCurvedSegment(Transform nodeParent) : base(nodeParent) 
         => MaxControlPoints = 3;
@@ -37,9 +37,11 @@ public class SimpleCurvedSegment : CurvedSegment
                 GetControlPoint(0).GetPosition(),
                 GetControlPoint(1).GetPosition(),
                 GetControlPoint(2).GetPosition()
-                );
+            );
             
-            AddNode(Node.Create(position, _nodeParent));
+            Debug.Log("Creating node: #" + t);
+            
+            AddNode(Node.Create(position, NodeParent));
             
             GetNode(NodeAmount-1).transform.LookAt(GetControlPoint(ControlPointAmount-1).GetPosition());
         }
