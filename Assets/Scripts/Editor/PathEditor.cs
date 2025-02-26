@@ -64,6 +64,9 @@ namespace Editor
             Vector3 mousePosition = e.mousePosition;
             Ray ray = HandleUtility.GUIPointToWorldRay(mousePosition);
             Physics.Raycast(ray, out hit);
+
+            if (hit.point == Vector3.zero)
+                return;
             
             
             if (Path.SegmentAmount == 0)
