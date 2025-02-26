@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Model;
-using Structs;
 using UnityEngine;
 
 namespace RoadComponent
@@ -10,9 +8,6 @@ namespace RoadComponent
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class Road : MonoBehaviour
     {
-        [SerializeField] public RoadProperties properties = new();
-        
-        
         [SerializeField] private int laneCount = 1;
         [SerializeField] private float laneWidth = 8;
         [SerializeField] private bool oneWay;
@@ -96,10 +91,6 @@ namespace RoadComponent
                 
                 for (int p = 0; p < points.Length; p++)
                 {
-                    // Vector3 newPosition = points[p].Position  +(
-                    //     (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + (laneWidth*i) ));
-                    
-                    //Kijken of onderstaande werkt
                     Vector3 newPosition = points[p].transform.TransformPoint(
                         (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + (laneWidth*i) ));
 
@@ -163,8 +154,6 @@ namespace RoadComponent
 
             void GenerateQuad(Node start, Node end)
             {
-                Debug.Log("Generating quad");
-                
                 if (vertices.Count == 0)
                 {
                     

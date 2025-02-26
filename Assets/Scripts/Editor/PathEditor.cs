@@ -71,7 +71,6 @@ namespace Editor
                 CreateSegment();
             }
             
-            
             //Draw buttons
             for (int i = 0; i < Path.SegmentAmount; i++)
             {
@@ -84,8 +83,13 @@ namespace Editor
                     if (Handles.Button(controlPoint, Quaternion.identity, 0.5f, 0.5f,  Handles.DotHandleCap))
                     {
                         bool isCurrentlySelected = _selectedSegment == i && _selectedControlPoint == j;
-                        
-                        if (segment.ControlPointAmount == segment.GetMaxControlPoints())
+
+
+                        if (segment.IsCompleted && e.shift)
+                        {
+                            Selection.activeObject = null;
+                        }
+                        else if (segment.IsCompleted)
                         {
                             CreateSegment();
                         }
