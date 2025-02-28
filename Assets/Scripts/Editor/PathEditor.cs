@@ -1,6 +1,6 @@
 using System;
 using Model;
-using RoadComponent;
+using RoadSystem;
 using UnityEditor;
 using UnityEngine;
 
@@ -119,7 +119,11 @@ namespace Editor
 
                 if (currentNode.GetPosition() != hit.point)
                 {
-                    segment.SetControlPoint(_selectedControlPoint.Value, hit.point);
+                    float terrainHeight = Terrain.activeTerrain.SampleHeight(hit.point);
+                    
+                    segment.SetControlPoint(_selectedControlPoint.Value, 
+                        new Vector3(hit.point.x, terrainHeight, hit.point.z));
+                    
                     Path.PathChanged?.Invoke();
                 }
             }

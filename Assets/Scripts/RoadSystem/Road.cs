@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Model;
+using UnityEditor;
 using UnityEngine;
 
-namespace RoadComponent
+namespace RoadSystem
 {
     [ExecuteInEditMode]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
@@ -14,6 +17,7 @@ namespace RoadComponent
         
         
         private List<Waypoint> _waypoints = new();
+        private SphereCollider _connectionCollider;
 
         public Path Path { get; private set; }
         private Mesh _mesh;
@@ -25,6 +29,11 @@ namespace RoadComponent
             _mesh = new Mesh() { name = "RoadMesh" };
             GetComponent<MeshFilter>().mesh = _mesh;
 
+            _connectionCollider = gameObject.AddComponent<SphereCollider>();
+            _connectionCollider.isTrigger = true;
+            _connectionCollider.radius = 20;
+            
+            
             Transform nodes = new GameObject("Nodes").transform;
             Transform controlPoints = new GameObject("ControlPoints").transform;
 
@@ -34,10 +43,26 @@ namespace RoadComponent
             Path = new Path(nodes, controlPoints);
             
             Path.PathChanged += PathChanged;
+            
         }
 
-        
-        
+
+        private void Update()
+        {
+            
+            var unconnectedWayPoints = _waypoints.Where(
+                wp => wp.NextWaypoint == null
+            );
+
+            
+            
+            if (unconnectedWayPoints.Any())
+            {
+                Debug.Log($"Found {unconnectedWayPoints.Count()} unconnected waypoints");
+            }
+        }
+
+
         private void PathChanged()
         {
          
@@ -76,6 +101,13 @@ namespace RoadComponent
             
             
             GenerateMesh();
+            
+            var lastSegment = Path.GetSegment(Path.SegmentAmount-1);
+            if (lastSegment is not null && lastSegment.IsCompleted)
+            {
+                _connectionCollider.enabled =  false; //Prevents deselection of gameobject
+                _connectionCollider.center = lastSegment.GetControlPoint(lastSegment.ControlPointAmount - 1).GetPosition();
+            }
         }
         
         
@@ -90,7 +122,7 @@ namespace RoadComponent
                 
                 
                 for (int p = 0; p < points.Length; p++)
-                {
+                { 
                     Vector3 newPosition = points[p].transform.TransformPoint(
                         (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + (laneWidth*i) ));
 
@@ -109,7 +141,7 @@ namespace RoadComponent
                 }
             }
         }
-
+        
 
 
         private void GenerateMesh()
