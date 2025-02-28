@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Model;
-using UnityEditor;
 using UnityEngine;
 
 namespace RoadSystem
 {
     [ExecuteInEditMode]
+    
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class Road : MonoBehaviour
     {
@@ -15,9 +14,8 @@ namespace RoadSystem
         [SerializeField] private float laneWidth = 8;
         [SerializeField] private bool oneWay;
         
-        
         private List<Waypoint> _waypoints = new();
-        private SphereCollider _connectionCollider;
+        private Transform _waypointParent;
 
         public Path Path { get; private set; }
         private Mesh _mesh;
@@ -29,47 +27,38 @@ namespace RoadSystem
             _mesh = new Mesh() { name = "RoadMesh" };
             GetComponent<MeshFilter>().mesh = _mesh;
 
-            _connectionCollider = gameObject.AddComponent<SphereCollider>();
-            _connectionCollider.isTrigger = true;
-            _connectionCollider.radius = 20;
-            
+            _waypointParent = new GameObject("Waypoints").transform;
+            _waypointParent.parent = transform;
             
             Transform nodes = new GameObject("Nodes").transform;
             Transform controlPoints = new GameObject("ControlPoints").transform;
-
+            
             nodes.parent = transform;
             controlPoints.parent = transform;
 
             Path = new Path(nodes, controlPoints);
             
             Path.PathChanged += PathChanged;
-            
         }
+        
 
 
-        private void Update()
-        {
-            
-            var unconnectedWayPoints = _waypoints.Where(
-                wp => wp.NextWaypoint == null
-            );
-
-            
-            
-            if (unconnectedWayPoints.Any())
-            {
-                Debug.Log($"Found {unconnectedWayPoints.Count()} unconnected waypoints");
-            }
-        }
-
-
+        public float GetRoadWidth()
+            => laneWidth * laneCount;
+    
         private void PathChanged()
         {
          
             //Handle change
             List<Node> nodes = new();
-            _waypoints = new();
 
+            for (int i = 0; i < _waypoints.Count; i++)
+            {
+                DestroyImmediate(_waypoints[i].gameObject);
+            }
+            _waypoints = new();
+            
+            
             for (int s = 0; s < Path.SegmentAmount; s++)
             {
                 Segment selectedSegment = Path.GetSegment(s);
@@ -102,12 +91,6 @@ namespace RoadSystem
             
             GenerateMesh();
             
-            var lastSegment = Path.GetSegment(Path.SegmentAmount-1);
-            if (lastSegment is not null && lastSegment.IsCompleted)
-            {
-                _connectionCollider.enabled =  false; //Prevents deselection of gameobject
-                _connectionCollider.center = lastSegment.GetControlPoint(lastSegment.ControlPointAmount - 1).GetPosition();
-            }
         }
         
         
@@ -118,7 +101,7 @@ namespace RoadSystem
             for (int i = 0; i < laneCount; i++)
             {
 
-                Waypoint? previousPoint = null;
+                Waypoint previousPoint = null;
                 
                 
                 for (int p = 0; p < points.Length; p++)
@@ -127,7 +110,7 @@ namespace RoadSystem
                         (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + (laneWidth*i) ));
 
                     
-                    Waypoint wp = new Waypoint(newPosition);
+                    Waypoint wp = Waypoint.Create(newPosition, _waypointParent);
                     _waypoints.Add(wp);
                     
 
@@ -182,7 +165,6 @@ namespace RoadSystem
             _mesh.vertices = vertices.ToArray();
             _mesh.triangles = triangles.ToArray();
             
-            
 
             void GenerateQuad(Node start, Node end)
             {
@@ -207,25 +189,6 @@ namespace RoadSystem
                     vertices.Count-2,
                     vertices.Count-3
                 });
-            }
-        }
-
-
-        private void OnDrawGizmos()
-        {
-            for (int i = 0; i < _waypoints.Count; i++)
-            {
-                Waypoint waypoint = _waypoints[i];
-
-                Gizmos.color = Color.red;
-                Gizmos.DrawSphere(waypoint.Position, 0.5f);
-
-                
-                if (waypoint.PreviousWaypoint is not null)
-                {
-                    Gizmos.color = Color.green;
-                    Gizmos.DrawLine(waypoint.Position, waypoint.PreviousWaypoint.Position);
-                }
             }
         }
     }

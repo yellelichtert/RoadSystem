@@ -1,6 +1,8 @@
 ﻿using System;
 using Model;
+using Unity.VisualScripting;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class SimpleCurvedSegment : CurvedSegment
 {
@@ -27,33 +29,32 @@ public class SimpleCurvedSegment : CurvedSegment
     protected override void GenerateSegment()
     {   
         if (ControlPointAmount < 3) return;
+
+        foreach (var node in Nodes)
+        {
+            Object.DestroyImmediate(node.gameObject);
+        }
         
         Nodes = Array.Empty<Node>();
         
         
         for (float t = 0; t < 1; t += 0.05f)
         {
-            Vector3 position = CalculateQuadraticBezierPoint(t,
+            Vector3 position = Utils.CalculateQuadraticBezierPoint(t,
                 GetControlPoint(0).GetPosition(),
                 GetControlPoint(1).GetPosition(),
                 GetControlPoint(2).GetPosition()
             );
             
             
-            AddNode(Node.Create(position, NodeParent));
+            float terrainHeight = Terrain.activeTerrain.SampleHeight(position);
+            AddNode(Node.Create(new Vector3(position.x, terrainHeight+0.05f, position.z), NodeParent));
+            
             GetNode(NodeAmount-1).transform.LookAt(GetControlPoint(ControlPointAmount-1).GetPosition());
         }
         
         AddNode(Node.Create(GetControlPoint(MaxControlPoints-1).GetPosition(), NodeParent));
         GetNode(NodeAmount - 1).transform.rotation = GetNode(NodeAmount - 2).transform.rotation;
     }
-    
-    
-    protected Vector3 CalculateQuadraticBezierPoint(float t, Vector3 cp1, Vector3 cp2, Vector3 cp3)
-    {
-        Vector3 p1 = Vector3.Lerp(cp1, cp2, t);
-        Vector3 p2 = Vector3.Lerp(cp2, cp3, t);
-        
-        return Vector3.Lerp(p1, p2, t);
-    }
+
 }

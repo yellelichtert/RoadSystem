@@ -8,7 +8,7 @@ namespace Model
     {
         public Vector3 GetPosition()
             => transform.position;
-
+        
         public void SetPosition(Vector3 position)
             => transform.position = position;
 
