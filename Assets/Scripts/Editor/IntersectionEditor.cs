@@ -29,6 +29,13 @@ namespace Editor
                 }
                 
                 var lastControlPoint = currentPath.GetSegment(currentPath.SegmentAmount-1).GetControlPoint(2);
+
+                Handles.color = Intersection.ContainsNode(lastControlPoint)
+                    ? Color.green
+                    : Color.white;
+                   
+                    
+                    
                 if (Handles.Button(lastControlPoint.GetPosition(), Quaternion.identity, 1, 1, Handles.DotHandleCap))
                 {
                     Intersection.AddNode(lastControlPoint, roadWidth);

@@ -19,8 +19,12 @@ namespace RoadSystem
             _waypointParent = new GameObject("Waypoints").transform;
             _waypointParent.parent = transform;
         }
-            
 
+
+        public bool ContainsNode(Node node)
+            => _nodes.Contains(node);
+        
+        
         public void AddNode(Node node, float roadWidth)
         {
             if (!_nodes.Contains(node))

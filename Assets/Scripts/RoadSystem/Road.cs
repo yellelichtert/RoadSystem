@@ -25,8 +25,10 @@ namespace RoadSystem
             transform.position = Vector3.zero;
             
             _mesh = new Mesh() { name = "RoadMesh" };
-            GetComponent<MeshFilter>().mesh = _mesh;
 
+            GetComponent<MeshFilter>().mesh = _mesh;
+            GetComponent<MeshRenderer>().material = Resources.Load<Material>("RoadMaterial");
+            
             _waypointParent = new GameObject("Waypoints").transform;
             _waypointParent.parent = transform;
             
