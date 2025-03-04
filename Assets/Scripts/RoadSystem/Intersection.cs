@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Model;
+using NUnit.Framework;
 using UnityEngine;
 
 namespace RoadSystem
@@ -8,9 +9,7 @@ namespace RoadSystem
     [ExecuteInEditMode]
     public class Intersection : MonoBehaviour
     {
-        private List<Node> _nodes = new();
-        private List<Waypoint[]> _waypoints = new();
-
+        private Dictionary<Node, Waypoint[]> _nodes = new();
         private Transform _waypointParent;
 
         private void Awake()
@@ -21,13 +20,13 @@ namespace RoadSystem
 
 
         public bool ContainsNode(Node node)
-            => _nodes.Contains(node);
+            => _nodes.ContainsKey(node);
         
         
         public void AddNode(Node node, float roadWidth)
         {
-            if (!ContainsNode(node))
-                _nodes.Add(node);
+            if (ContainsNode(node))
+                return;
             
             Collider[] waypoints = Physics.OverlapSphere(node.GetPosition(), roadWidth);
             
@@ -38,57 +37,61 @@ namespace RoadSystem
                 {
                     waypointsInRoad.Add(waypoint);
                 }
-            }
-
-            _waypoints.Add(waypointsInRoad.ToArray());
+            }  
             
-            CreateLinks();
-            GenerateMesh();
+            _nodes.Add(node, waypointsInRoad.ToArray());
+
+            if (_nodes.Count > 1)
+            {
+                CreateLinks();
+                GenerateMesh();
+            }
             
         }
 
 
         public void RemoveNode(Node node)
         {
-            Debug.Log("Removing Node");
+            for (int i = 0; i < _waypointParent.childCount;)
+            {
+                Debug.Log("Destroying point :" + _waypointParent.GetChild(i).name);
+                DestroyImmediate(_waypointParent.GetChild(i).gameObject);
+            }
+            
             
             _nodes.Remove(node);
-            
-            CreateLinks();
-            GenerateMesh();
+
+            if (_nodes.Count > 1)
+            {
+                CreateLinks();
+                GenerateMesh();
+            }
         }
             
 
         private void CreateLinks()
         {
-            Debug.Log("Creating links");
-            
-            //Todo: Destroy all link waypoints before creating new links
-            
-            //Find empty NextPoints
-            List<Waypoint> emptyNext = new List<Waypoint>();
-            for (int i = 0; i < _waypoints.Count; i++)
+            List<Waypoint> connections = new();
+            foreach (var (_, waypoint) in _nodes)
             {
-                emptyNext.AddRange(_waypoints[i].Where(wp => wp.NextWaypoint is null));
+                connections.AddRange(waypoint.Where(wp => wp.PreviousWaypoint is null));
             }
-
-
-            for (int i = 0; i < _waypoints.Count; i++)
+            
+            
+            foreach (var (_, waypoints) in _nodes)
             {
-                var connections = emptyNext
-                    .Where(wp => !_waypoints[i].Contains(wp))
+                Waypoint[] currentConnections = connections
+                    .Where(wp => !waypoints.Contains(wp))
                     .ToArray();
 
-
-                var currentPoints = _waypoints[i]
-                    .Where(wp => wp.PreviousWaypoint is null)
-                    .ToArray();
-
-                for (int c = 0; c < currentPoints.Length; c++)
+                for (int i = 0; i < waypoints.Length; i++)
                 {
-                    for (int j = 0; j < connections.Length; j++)
+                    if (waypoints[i].NextWaypoint is not null)
+                        continue;
+
+                    for (var j = 0; j < currentConnections.Length; j++)
                     {
-                        connections[j].AddLink(currentPoints[c], _waypointParent);
+                        waypoints[i].AddLink(currentConnections[j], _waypointParent);
                     }
                 }
             }
@@ -105,20 +108,17 @@ namespace RoadSystem
 
         private void OnDrawGizmosSelected()
         {
-            if (!_waypoints.Any())
+            if (!_nodes.Any())
                 return;
 
             Gizmos.color = Color.cyan;
-            for (int i = 0; i < _waypoints.Count; i++)
+            foreach (var (node, waypoints) in _nodes)
             {
-                Waypoint[] currentRoad = _waypoints[i];
-
-                for (int j = 0; j < currentRoad.Length; j++)
+                for (int j = 0; j < waypoints.Length; j++)
                 {
-                    Gizmos.DrawSphere(currentRoad[j].GetPosition(), 2f);
+                    Gizmos.DrawSphere(waypoints[j].GetPosition(), 2f);
                 }
             }
-            
         }
     }
 }

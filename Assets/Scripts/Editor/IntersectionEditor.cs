@@ -20,18 +20,23 @@ namespace Editor
                 Path currentPath = roads[i].Path;
                 float roadWidth = roads[i].GetRoadWidth();
                 
+                
                 var firstControlPoint = currentPath.GetSegment(0).GetControlPoint(0);
+                
+                Handles.color = Intersection.ContainsNode(firstControlPoint)
+                    ? Color.green
+                    : Color.white;
+                
                 if (Handles.Button(firstControlPoint.GetPosition(), Quaternion.identity, 1, 1, Handles.DotHandleCap))
                 {
                     Intersection.AddNode(firstControlPoint, roadWidth);
                 }
                 
                 var lastControlPoint = currentPath.GetSegment(currentPath.SegmentAmount-1).GetControlPoint(2);
-
+                
                 Handles.color = Intersection.ContainsNode(lastControlPoint)
                     ? Color.green
                     : Color.white;
-                    
                     
                 if (Handles.Button(lastControlPoint.GetPosition(), Quaternion.identity, 1, 1, Handles.DotHandleCap))
                 {

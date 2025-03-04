@@ -120,12 +120,12 @@ namespace RoadSystem
                         previousPoint.NextWaypoint = wp;
                     }
 
+                    
                     wp.transform.rotation = points[p].transform.rotation;
                     if (left)
                     {
                         wp.transform.rotation *= Quaternion.Euler(180,0,0);
                     }
-                    
                     
                     
                     previousPoint = wp;

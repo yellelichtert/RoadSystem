@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿using Vector3 = UnityEngine.Vector3;
 
 public static class Utils
 {
@@ -14,25 +14,14 @@ public static class Utils
     
     public static Vector3 FindIntersectionPoint(Vector3 point1, Vector3 direction1, Vector3 point2, Vector3 direction2) 
     {
-        Debug.Log("Finding point");
-
-        Vector3 temp1;
-        Vector3 temp2;
         
-        for (float t = 0; t < 1; t+=0.05f)
-        {
-            temp1 = Vector3.Lerp(point1, direction1, t);
-            temp2 = Vector3.Lerp(point2, direction2, t);
+        Vector3 crossDir = Vector3.Cross(direction1, direction2);
+        
+        Vector3 diff = point2 - point1;
+        float t = Vector3.Dot(Vector3.Cross(diff, direction1), crossDir) / crossDir.sqrMagnitude;
 
-            var obj1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            obj1.transform.position = temp1;
-            
-            var obj2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            obj2.transform.position = temp2;
-
-        }
-
-        return Vector3.zero;
+        return point1 + t * direction1;
+        
     }
 
     

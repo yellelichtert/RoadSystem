@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Model
 {
+    [ExecuteInEditMode]
     [RequireComponent(typeof(SphereCollider))]
     public class Waypoint : MonoBehaviour
     {
@@ -27,27 +30,32 @@ namespace Model
             List<Waypoint> linkedPoints = new();
 
             Vector3 middlePoint = Utils.FindIntersectionPoint(
-                GetPosition(), GetPosition() + Vector3.forward *5
-                ,link.GetPosition(), link.GetPosition() + Vector3.back *5);
+                GetPosition(), transform.forward
+                ,link.GetPosition(), -link.transform.forward);
             
             
-            // Waypoint previousPoint = null;
-            // for (float t = 0; t < 1; t += 0.05f)
-            // {
-            //     Vector3 nextPostition = Vector3.Lerp(GetPosition(), link.GetPosition(), t);
-            //     
-            //     Waypoint newPoint = Create(nextPostition, parent, true);
-            //     
-            //     newPoint.PreviousWaypoint = previousPoint ?? this;
-            //     previousPoint = newPoint;
-            //
-            //     linkedPoints.Add(newPoint);
-            // }
+            Waypoint previousPoint = null;
+            for (float t = 0; t < 1; t += 0.05f)
+            {
+                Vector3 nextPostition = Utils.CalculateQuadraticBezierPoint(t,
+                    GetPosition(),
+                    middlePoint,
+                    link.GetPosition()
+                );
+                
+                Waypoint newPoint = Create(nextPostition, parent, true);
+                
+                newPoint.PreviousWaypoint = previousPoint ?? this;
+                previousPoint = newPoint;
+            
+                linkedPoints.Add(newPoint);
+            }
             
             LinkedWaypoints.Add(linkedPoints.ToArray());
         }
         
-       
+        
+        
 
         public static Waypoint Create(Vector3 position, Transform parent, bool isLink = false)
         {
@@ -65,24 +73,17 @@ namespace Model
 
         private void OnDrawGizmos()
         {
-           Gizmos.color = isLink ? Color.blue : Color.red; 
-           Gizmos.DrawSphere(GetPosition(), 0.5f);
+            Gizmos.color = isLink ? Color.blue : Color.red; 
+            Gizmos.DrawSphere(GetPosition(), 0.5f);
            
-           if (PreviousWaypoint is not null)
-           { 
-               Gizmos.color = isLink ? Color.blue : Color.green; 
-               Gizmos.DrawLine(GetPosition(), PreviousWaypoint.GetPosition());
-           }
-
-           if (PreviousWaypoint is null || NextWaypoint is null)
-           {
-               Vector3 forwardpos = GetPosition() +  transform.forward * 5;
-               
-               Gizmos.color = Color.yellow;
-               Gizmos.DrawSphere(forwardpos, 1f);
-               Gizmos.DrawLine(forwardpos, GetPosition());
-           }
-           
+            if (PreviousWaypoint is not null)
+            {
+                if (PreviousWaypoint.IsDestroyed())
+                    return;
+                
+                Gizmos.color = isLink ? Color.blue : Color.green; 
+                Gizmos.DrawLine(GetPosition(), PreviousWaypoint.GetPosition());
+            }
         }
     }
 }
