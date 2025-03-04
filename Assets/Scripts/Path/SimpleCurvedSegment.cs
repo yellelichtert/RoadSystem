@@ -1,5 +1,6 @@
 ﻿using System;
 using Model;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -40,7 +41,7 @@ public class SimpleCurvedSegment : CurvedSegment
         
         for (float t = 0; t < 1; t += 0.05f)
         {
-            Vector3 position = Utils.CalculateQuadraticBezierPoint(t,
+            Vector3 position = Utils.CalculateCurvePoint(t,
                 GetControlPoint(0).GetPosition(),
                 GetControlPoint(1).GetPosition(),
                 GetControlPoint(2).GetPosition()
@@ -55,6 +56,7 @@ public class SimpleCurvedSegment : CurvedSegment
         
         AddNode(Node.Create(GetControlPoint(MaxControlPoints-1).GetPosition(), NodeParent));
         GetNode(NodeAmount - 1).transform.rotation = GetNode(NodeAmount - 2).transform.rotation;
+        
     }
 
 }

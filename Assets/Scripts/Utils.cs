@@ -2,7 +2,21 @@
 
 public static class Utils
 {
-    public static Vector3 CalculateQuadraticBezierPoint(float t, Vector3 cp1, Vector3 cp2, Vector3 cp3)
+    public static Vector3[] CalculateCurve(int pCount, Vector3 cp1, Vector3 cp2, Vector3 cp3)
+    {
+        Vector3[] points = new Vector3[pCount];
+        
+        for (int i = 0; i < pCount; i++)
+        {
+            // ReSharper disable once PossibleLossOfFraction
+            points[i - 1] = CalculateCurvePoint(1 / i, cp1, cp2, cp3);
+        }
+
+        return points;
+    }
+    
+    
+    public static Vector3 CalculateCurvePoint(float t, Vector3 cp1, Vector3 cp2, Vector3 cp3)
     {
         Vector3 p1 = Vector3.Lerp(cp1, cp2, t);
         Vector3 p2 = Vector3.Lerp(cp2, cp3, t);

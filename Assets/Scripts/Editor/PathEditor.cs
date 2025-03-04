@@ -10,8 +10,8 @@ namespace Editor
     public class PathEditor : UnityEditor.Editor
     {
         private Path Path => ((Road)target).Path;
-        
-        
+
+
         private SegmentType _selectedSegmentType;
         private enum SegmentType 
         {Straight, Curved, ComplexCurved}

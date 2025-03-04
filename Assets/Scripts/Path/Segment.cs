@@ -27,6 +27,14 @@ public class Segment
             ControlPoints[index - 1].
                 transform.LookAt(position);
         }
+
+        if (ControlPointAmount == MaxControlPoints)
+        {
+            
+            ControlPoints[ControlPointAmount-1]
+                .transform.LookAt(ControlPoints[ControlPointAmount-2].GetPosition());
+            
+        }
     }
         
 

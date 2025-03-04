@@ -30,13 +30,13 @@ public class  ComplexCurvedSegment : SimpleCurvedSegment
             for (float t = 0; t <  1; t += 0.05f)
             {
                 
-                Vector3 p1 = Utils.CalculateQuadraticBezierPoint(t,
+                Vector3 p1 = Utils.CalculateCurvePoint(t,
                     GetControlPoint(0).GetPosition(),
                     GetControlPoint(1).GetPosition(),
                     GetControlPoint(2).GetPosition()
                 );
                 
-                Vector3 p2 = Utils.CalculateQuadraticBezierPoint(t,
+                Vector3 p2 = Utils.CalculateCurvePoint(t,
                     GetControlPoint(0).GetPosition(),
                     GetControlPoint(2).GetPosition(),
                     GetControlPoint(3).GetPosition()

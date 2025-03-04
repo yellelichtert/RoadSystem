@@ -12,8 +12,8 @@ namespace Model
     {
         [CanBeNull] public Waypoint PreviousWaypoint { get; set; }
         [CanBeNull] public Waypoint NextWaypoint { get; set; }
-        
         [CanBeNull] public List<Waypoint[]> LinkedWaypoints { get; private set; }
+        
         public bool isLink;
         
         
@@ -22,13 +22,19 @@ namespace Model
 
         
         
+        
         public void AddLink(Waypoint link, Transform parent)
         {
+            
             if (LinkedWaypoints is null) 
                 LinkedWaypoints = new();
 
+            
+            
             List<Waypoint> linkedPoints = new();
 
+            
+            
             Vector3 middlePoint = Utils.FindIntersectionPoint(
                 GetPosition(), transform.forward
                 ,link.GetPosition(), -link.transform.forward);
@@ -37,7 +43,7 @@ namespace Model
             Waypoint previousPoint = null;
             for (float t = 0; t < 1; t += 0.05f)
             {
-                Vector3 nextPostition = Utils.CalculateQuadraticBezierPoint(t,
+                Vector3 nextPostition = Utils.CalculateCurvePoint(t,
                     GetPosition(),
                     middlePoint,
                     link.GetPosition()
@@ -49,9 +55,12 @@ namespace Model
                 previousPoint = newPoint;
             
                 linkedPoints.Add(newPoint);
+                
             }
             
+            
             LinkedWaypoints.Add(linkedPoints.ToArray());
+            
         }
         
         
@@ -59,31 +68,44 @@ namespace Model
 
         public static Waypoint Create(Vector3 position, Transform parent, bool isLink = false)
         {
+            
             Waypoint waypoint = new GameObject($"Waypoint #{parent.childCount+1}")
                 .AddComponent<Waypoint>();
-
+            
+            
             waypoint.transform.position = position;
             waypoint.transform.parent = parent;
-
             waypoint.isLink = isLink;
-
+            
+            
             return waypoint;
+            
         }
 
 
         private void OnDrawGizmos()
         {
-            Gizmos.color = isLink ? Color.blue : Color.red; 
+            
+            
+            Gizmos.color = isLink ? Color.blue : Color.red;
             Gizmos.DrawSphere(GetPosition(), 0.5f);
+                
+            
            
             if (PreviousWaypoint is not null)
             {
+                
                 if (PreviousWaypoint.IsDestroyed())
                     return;
                 
+                
                 Gizmos.color = isLink ? Color.blue : Color.green; 
                 Gizmos.DrawLine(GetPosition(), PreviousWaypoint.GetPosition());
+                
             }
+            
         }
+        
     }
+    
 }
