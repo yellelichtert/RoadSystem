@@ -13,39 +13,26 @@ public static class Utils
     
     
     public static Vector3 FindIntersectionPoint(Vector3 point1, Vector3 direction1, Vector3 point2, Vector3 direction2) 
-
     {
+        Debug.Log("Finding point");
 
-        // Calculate the difference between starting points
+        Vector3 temp1;
+        Vector3 temp2;
+        
+        for (float t = 0; t < 1; t+=0.05f)
+        {
+            temp1 = Vector3.Lerp(point1, direction1, t);
+            temp2 = Vector3.Lerp(point2, direction2, t);
 
-        Vector3 diff = point2 - point1;
+            var obj1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            obj1.transform.position = temp1;
+            
+            var obj2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            obj2.transform.position = temp2;
 
-    
+        }
 
-        // Calculate the denominator (cross product of direction vectors)
-
-        float denominator = Vector3.Dot(direction1, Vector3.Cross(direction1, direction2));
-
-
-
-        // Check for parallel lines (denominator close to zero)
-
-        if (Mathf.Abs(denominator) < Mathf.Epsilon)
-
-            return Vector3.zero; // Or handle parallel case appropriately
-
-
-
-        // Solve for "t"
-
-        float t = Vector3.Dot(diff, Vector3.Cross(direction2, direction1)) / denominator;
-
-
-
-        // Calculate the intersection point
-
-        return point1 + t * direction1;
-
+        return Vector3.zero;
     }
 
     

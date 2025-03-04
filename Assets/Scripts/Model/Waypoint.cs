@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
-using NUnit.Framework;
 using UnityEngine;
 
 namespace Model
@@ -14,9 +13,11 @@ namespace Model
         [CanBeNull] public List<Waypoint[]> LinkedWaypoints { get; private set; }
         public bool isLink;
         
+        
         public Vector3 GetPosition()
             => transform.position;
 
+        
         
         public void AddLink(Waypoint link, Transform parent)
         {
@@ -25,18 +26,23 @@ namespace Model
 
             List<Waypoint> linkedPoints = new();
 
-            Waypoint previousPoint = null;
-            for (float t = 0; t < 1; t += 0.05f)
-            {
-                Vector3 nextPostition = Vector3.Lerp(GetPosition(), link.GetPosition(), t);
-                
-                Waypoint newPoint = Create(nextPostition, parent, true);
-                
-                newPoint.PreviousWaypoint = previousPoint ?? this;
-                previousPoint = newPoint;
-
-                linkedPoints.Add(newPoint);
-            }
+            Vector3 middlePoint = Utils.FindIntersectionPoint(
+                GetPosition(), GetPosition() + Vector3.forward *5
+                ,link.GetPosition(), link.GetPosition() + Vector3.back *5);
+            
+            
+            // Waypoint previousPoint = null;
+            // for (float t = 0; t < 1; t += 0.05f)
+            // {
+            //     Vector3 nextPostition = Vector3.Lerp(GetPosition(), link.GetPosition(), t);
+            //     
+            //     Waypoint newPoint = Create(nextPostition, parent, true);
+            //     
+            //     newPoint.PreviousWaypoint = previousPoint ?? this;
+            //     previousPoint = newPoint;
+            //
+            //     linkedPoints.Add(newPoint);
+            // }
             
             LinkedWaypoints.Add(linkedPoints.ToArray());
         }
@@ -66,6 +72,15 @@ namespace Model
            { 
                Gizmos.color = isLink ? Color.blue : Color.green; 
                Gizmos.DrawLine(GetPosition(), PreviousWaypoint.GetPosition());
+           }
+
+           if (PreviousWaypoint is null || NextWaypoint is null)
+           {
+               Vector3 forwardpos = GetPosition() +  transform.forward * 5;
+               
+               Gizmos.color = Color.yellow;
+               Gizmos.DrawSphere(forwardpos, 1f);
+               Gizmos.DrawLine(forwardpos, GetPosition());
            }
            
         }

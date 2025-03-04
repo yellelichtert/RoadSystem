@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Model;
 using UnityEngine;
@@ -27,9 +26,8 @@ namespace RoadSystem
         
         public void AddNode(Node node, float roadWidth)
         {
-            if (!_nodes.Contains(node))
+            if (!ContainsNode(node))
                 _nodes.Add(node);
-
             
             Collider[] waypoints = Physics.OverlapSphere(node.GetPosition(), roadWidth);
             
@@ -43,17 +41,30 @@ namespace RoadSystem
             }
 
             _waypoints.Add(waypointsInRoad.ToArray());
-
-            if (_nodes.Count > 2)
-            {
-                CreateLinks();
-                GenerateMesh();
-            }
-                
+            
+            CreateLinks();
+            GenerateMesh();
+            
         }
+
+
+        public void RemoveNode(Node node)
+        {
+            Debug.Log("Removing Node");
+            
+            _nodes.Remove(node);
+            
+            CreateLinks();
+            GenerateMesh();
+        }
+            
 
         private void CreateLinks()
         {
+            Debug.Log("Creating links");
+            
+            //Todo: Destroy all link waypoints before creating new links
+            
             //Find empty NextPoints
             List<Waypoint> emptyNext = new List<Waypoint>();
             for (int i = 0; i < _waypoints.Count; i++)
@@ -88,6 +99,7 @@ namespace RoadSystem
         private void GenerateMesh()
         {
             Debug.Log("Generating Intersection Mesh");
+            //Todo: Implement Intersection mesh generation.
         }
 
 
@@ -106,40 +118,6 @@ namespace RoadSystem
                     Gizmos.DrawSphere(currentRoad[j].GetPosition(), 2f);
                 }
             }
-
-            
-            
-            // if (_waypoints.Count <= 2)
-            //     return;
-            //
-            // //Find empty NextPoints
-            // List<Waypoint> emptyNext = new List<Waypoint>();
-            // for (int i = 0; i < _waypoints.Count; i++)
-            // {
-            //     emptyNext.AddRange(_waypoints[i].Where(wp => wp.NextWaypoint is null));
-            // }
-            //
-            //
-            // for (int i = 0; i < _waypoints.Count; i++)
-            // {
-            //     var connections = emptyNext
-            //         .Where(wp => !_waypoints[i].Contains(wp))
-            //         .ToArray();
-            //
-            //     
-            //     var currentPoints = _waypoints[i]
-            //         .Where(wp => wp.PreviousWaypoint is null)
-            //         .ToArray();
-            //
-            //     for (int c = 0; c < currentPoints.Length; c++)
-            //     {
-            //         for (int j = 0; j < connections.Length; j++)
-            //         {
-            //             Gizmos.DrawLine(currentPoints[c].GetPosition(), connections[j].GetPosition());
-            //         }
-            //     }
-            //     
-            // }
             
         }
     }

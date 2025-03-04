@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Model;
 using UnityEngine;
 
 namespace RoadSystem
 {
     [ExecuteInEditMode]
-    
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class Road : MonoBehaviour
     {
@@ -109,18 +107,26 @@ namespace RoadSystem
                 for (int p = 0; p < points.Length; p++)
                 { 
                     Vector3 newPosition = points[p].transform.TransformPoint(
-                        (left ? Vector3.right : Vector3.left) * ((laneWidth / 2) + (laneWidth*i) ));
-
+                        (left ? Vector3.left : Vector3.right) * ((laneWidth / 2) + (laneWidth*i) ));
+                    
                     
                     Waypoint wp = Waypoint.Create(newPosition, _waypointParent);
+                    
                     _waypoints.Add(wp);
                     
-
                     if (previousPoint is not null)
                     {
                         wp.PreviousWaypoint = previousPoint;
                         previousPoint.NextWaypoint = wp;
                     }
+
+                    wp.transform.rotation = points[p].transform.rotation;
+                    if (left)
+                    {
+                        wp.transform.rotation *= Quaternion.Euler(180,0,0);
+                    }
+                    
+                    
                     
                     previousPoint = wp;
                 }

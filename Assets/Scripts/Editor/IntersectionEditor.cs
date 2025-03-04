@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Model;
-using RoadSystem;
+﻿using RoadSystem;
 using UnityEditor;
 using UnityEngine;
 
@@ -33,12 +31,18 @@ namespace Editor
                 Handles.color = Intersection.ContainsNode(lastControlPoint)
                     ? Color.green
                     : Color.white;
-                   
                     
                     
                 if (Handles.Button(lastControlPoint.GetPosition(), Quaternion.identity, 1, 1, Handles.DotHandleCap))
                 {
-                    Intersection.AddNode(lastControlPoint, roadWidth);
+                    if (!Intersection.ContainsNode(lastControlPoint))
+                    {
+                        Intersection.AddNode(lastControlPoint, roadWidth);
+                    }
+                    else
+                    {
+                        Intersection.RemoveNode(lastControlPoint);
+                    }
                 }
                 
             }
