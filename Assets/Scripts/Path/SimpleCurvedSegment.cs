@@ -55,8 +55,10 @@ public class SimpleCurvedSegment : CurvedSegment
         }
         
         AddNode(Node.Create(GetControlPoint(MaxControlPoints-1).GetPosition(), NodeParent));
-        GetNode(NodeAmount - 1).transform.rotation = GetNode(NodeAmount - 2).transform.rotation;
         
+        GetNode(NodeAmount - 1).transform.rotation = GetNode(NodeAmount - 2).transform.rotation;
+        GetControlPoint(ControlPointAmount - 1).transform.rotation = GetNode(NodeAmount - 1).transform.rotation;
     }
-
+    
+    
 }
