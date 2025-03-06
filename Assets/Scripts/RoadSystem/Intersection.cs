@@ -1,25 +1,32 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Model;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace RoadSystem
 {
     [ExecuteInEditMode]
+    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class Intersection : MonoBehaviour
     {
         
         private Dictionary<Node, (float roadWidth, Waypoint[] waypoints)> _nodes = new();
         private Transform _waypointParent;
-
+        private Mesh _mesh;
         
         
         private void Awake()
         {
+            transform.position = Vector3.zero;
             
             _waypointParent = new GameObject("Waypoints").transform;
             _waypointParent.parent = transform;
+
+            _mesh = new Mesh();
             
+            GetComponent<MeshFilter>().mesh = _mesh;
+            GetComponent<MeshRenderer>().material = Resources.Load<Material>("RoadMaterial");
         }
         
         
@@ -44,7 +51,7 @@ namespace RoadSystem
             for (int i = 0; i < waypoints.Length; i++)
             {
                 
-                if (waypoints[i].gameObject.TryGetComponent(out Waypoint waypoint) && (waypoint.PreviousWaypoint is null || waypoint.NextWaypoint is null))
+                if (waypoints[i].gameObject.TryGetComponent(out Waypoint waypoint) && !waypoint.isLink && (waypoint.PreviousWaypoint is null || waypoint.NextWaypoint is null))
                 {
                     
                     waypointsInRoad.Add(waypoint);
@@ -57,16 +64,10 @@ namespace RoadSystem
             _nodes.Add(node, (roadWidth, waypointsInRoad.ToArray()));
 
             
-            if (_nodes.Count > 1)
-            {
-                
-                CreateLinks();
-                GenerateMesh();
-                
-            }
+           GenerateIntersection();
             
         }
-
+        
 
         
         
@@ -84,17 +85,25 @@ namespace RoadSystem
             _nodes.Remove(node);
             
 
+            GenerateIntersection();
+            
+        }
+            
+
+        
+        private void GenerateIntersection()
+        {
+            _meshCurves = new();
+            
             if (_nodes.Count > 1)
             {
                 
                 CreateLinks();
                 GenerateMesh();
                 
+                
             }
-            
         }
-            
-
         
         
         private void CreateLinks()
@@ -138,14 +147,98 @@ namespace RoadSystem
             }
             
         }
-        
-        
+
+
         
         
         private void GenerateMesh()
         {
+            //todo: Handle creating quad (temporary) or implement smooth edges
+            if (_nodes.Count == 2)
+            {
+                Debug.Log("CREATE QUAD");
+                return;
+            }
             
-            Debug.Log("Generating Intersection Mesh");
+            
+            var centerPoint = Utils.FindCenter(_nodes
+                .Select(n => n.Key.GetPosition())
+                .ToArray()
+            );
+            
+            
+            var cornerPoints = new List<Vector3>();
+            foreach (var n in _nodes)
+            {
+                var node = n.Key;
+                var width = n.Value.roadWidth;
+                
+                cornerPoints.Add(node.GetPosition() + node.transform.right * width);
+                cornerPoints.Add(node.GetPosition() + -node.transform.right * width);
+            }
+            
+            
+            
+            //Start creating mesh.
+            var vertices = new List<Vector3>();
+            var triangles = new List<int>();
+
+            vertices.Add(centerPoint);
+            
+            
+            //Generate triangles attached to roads.
+            for (int i = 0; i < cornerPoints.Count; i+=2)
+            {
+                
+                vertices.Add(cornerPoints[i]);
+                vertices.Add(cornerPoints[i+1]);
+                
+                triangles.Add(vertices.IndexOf(cornerPoints[i]));
+                triangles.Add(vertices.IndexOf(cornerPoints[i+1]));
+                triangles.Add(vertices.IndexOf(centerPoint));
+                
+            }
+
+            
+            //Generate edge triangles.
+             var usedPoints = new List<Vector3>();
+            
+             for (int i = 0; i < cornerPoints.Count && _nodes.Count > 2; i += 2)
+             {
+                 if (usedPoints.Any(v => v == cornerPoints[i])) return;
+                 
+                 
+                 //Get closest point
+                 Vector3? closestPoint = null;
+                 foreach (var corner in cornerPoints)
+                 {
+                     if (corner == cornerPoints[i] || usedPoints.Any(v => v == corner)) continue; //Kan mss weg?
+                 
+                     if (!closestPoint.HasValue)
+                     {
+                         closestPoint = corner;
+                         continue;
+                     }
+                     
+                     if (Vector3.Distance(cornerPoints[i], corner) < Vector3.Distance(cornerPoints[i], closestPoint.Value))
+                     {
+                         closestPoint = corner;
+                     }
+                     
+                     
+                     Debug.Log("Looped once");
+                     
+                     triangles.Add(vertices.IndexOf(cornerPoints[i]));
+                     triangles.Add(vertices.IndexOf(closestPoint.Value));
+                     triangles.Add(vertices.IndexOf(centerPoint));
+                 }
+             }
+            
+             
+            _mesh.Clear();
+            _mesh.vertices = vertices.ToArray();
+            _mesh.triangles = triangles.ToArray();
+            
             
         }
 
@@ -175,7 +268,6 @@ namespace RoadSystem
                 }
                 
             }
-            
         }
         
     }
