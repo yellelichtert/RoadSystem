@@ -2,6 +2,7 @@
 
 public static class Utils
 {
+    
     public static Vector3[] CalculateCurve(int pCount, Vector3 cp1, Vector3 cp2, Vector3 cp3)
     {
         Vector3[] points = new Vector3[pCount];
@@ -15,6 +16,7 @@ public static class Utils
         return points;
     }
     
+
     
     public static Vector3 CalculateCurvePoint(float t, Vector3 cp1, Vector3 cp2, Vector3 cp3)
     {
@@ -36,6 +38,30 @@ public static class Utils
 
         return point1 + t * direction1;
         
+    }
+
+
+    public static Vector3 FindCenter(Vector3[] points)
+    {
+        
+        Vector3? sum = null;
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            if (sum.HasValue)
+            {
+                sum += points[i];
+            }
+            else
+            {
+                sum = points[i];
+            }
+            
+            
+            
+        }
+
+        return sum.Value / points.Length;
     }
 
     
