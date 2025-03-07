@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Model;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 namespace RoadSystem
@@ -22,10 +25,10 @@ namespace RoadSystem
         {
             transform.position = Vector3.zero;
             
-            _mesh = new Mesh() { name = "RoadMesh" };
+            _mesh = new Mesh();
 
             GetComponent<MeshFilter>().mesh = _mesh;
-            GetComponent<MeshRenderer>().material = Resources.Load<Material>("RoadMaterial");
+            GetComponent<MeshRenderer>().material = Resources.Load<Material>("Asphalt");
             
             _waypointParent = new GameObject("Waypoints").transform;
             _waypointParent.parent = transform;
@@ -132,7 +135,7 @@ namespace RoadSystem
                 }
             }
         }
-        
+
 
 
         private void GenerateMesh()
@@ -140,6 +143,7 @@ namespace RoadSystem
             
             List<Vector3> vertices = new();
             List<int> triangles = new();
+            List<Vector2> uvs = new();
             
             for (int i = 0; i < Path.SegmentAmount; i++)
             {
@@ -169,23 +173,41 @@ namespace RoadSystem
                 
             }
             
+            
+            
+            for (int i = 0; i < vertices.Count/2; i++)
+            {
+                // float yPoint =  i == 0 ? 0 : ( (vertices.Count/2) / i); 
+                
+                uvs.Add(new Vector2(1, i));
+                uvs.Add(new Vector2(0, i));
+            }
+            
+            Debug.Log("VerticesCount: " + vertices.Count);
+            Debug.Log("uvs count: " + uvs.Count);
+            
             _mesh.Clear();
             _mesh.vertices = vertices.ToArray();
             _mesh.triangles = triangles.ToArray();
+            _mesh.uv = uvs.ToArray();
             
-
+            
             void GenerateQuad(Node start, Node end)
             {
                 if (vertices.Count == 0)
                 {
-                    
                     vertices.Add(start.transform.TransformPoint(((Vector3.right * laneWidth) * laneCount) +(Vector3.up *0.01f)));
                     vertices.Add(start.transform.TransformPoint(((Vector3.left * laneWidth) * laneCount) +(Vector3.up *0.01f)));
                     
+                    // uvs.Add(new Vector2(1,0));   // -> rechts van onder
+                    // uvs.Add(new Vector2(0,0));   // -> links van onder
                 }
                 
                 vertices.Add(end.transform.TransformPoint(((Vector3.right * laneWidth) * laneCount) +(Vector3.up *0.1f)));
                 vertices.Add(end.transform.TransformPoint(((Vector3.left * laneWidth) * laneCount) +(Vector3.up *0.01f)));
+                
+                // uvs.Add(new Vector2(1,1));   
+                // uvs.Add(new Vector2(0,1));   
                 
                 
                 triangles.AddRange(new []
@@ -197,6 +219,7 @@ namespace RoadSystem
                     vertices.Count-2,
                     vertices.Count-3
                 });
+                
             }
         }
     }
