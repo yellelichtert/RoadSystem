@@ -93,16 +93,11 @@ namespace RoadSystem
         
         private void GenerateIntersection()
         {
-            _meshCurves = new();
+
+            if (_nodes.Count < 2) return;
             
-            if (_nodes.Count > 1)
-            {
-                
-                CreateLinks();
-                GenerateMesh();
-                
-                
-            }
+            CreateLinks();
+            GenerateMesh();
         }
         
         
@@ -147,9 +142,10 @@ namespace RoadSystem
             }
             
         }
-
-
         
+        
+        //Testing
+        private List<Vector3> _offsetcorners = new();
         
         private void GenerateMesh()
         {
@@ -167,15 +163,20 @@ namespace RoadSystem
             );
             
             
-            var cornerPoints = new List<Vector3>();
+            var cornerPoints = new List<Vector3[]>();
             foreach (var n in _nodes)
             {
                 var node = n.Key;
                 var width = n.Value.roadWidth;
                 
-                cornerPoints.Add(node.GetPosition() + node.transform.right * width);
-                cornerPoints.Add(node.GetPosition() + -node.transform.right * width);
+                cornerPoints.Add(new []
+                {
+                    node.GetPosition() + node.transform.right * width,
+                    node.GetPosition() + -node.transform.right * width
+                });
             }
+            
+            
             
             
             
@@ -187,58 +188,53 @@ namespace RoadSystem
             
             
             //Generate triangles attached to roads.
-            for (int i = 0; i < cornerPoints.Count; i+=2)
+            for (int i = 0; i < cornerPoints.Count; i++)
             {
                 
-                vertices.Add(cornerPoints[i]);
-                vertices.Add(cornerPoints[i+1]);
+                vertices.Add(cornerPoints[i][0]);
+                vertices.Add(cornerPoints[i][1]);
                 
-                triangles.Add(vertices.IndexOf(cornerPoints[i]));
-                triangles.Add(vertices.IndexOf(cornerPoints[i+1]));
+                triangles.Add(vertices.IndexOf(cornerPoints[i][0]));
+                triangles.Add(vertices.IndexOf(cornerPoints[i][1]));
                 triangles.Add(vertices.IndexOf(centerPoint));
                 
             }
 
-            
+
             //Generate edge triangles.
-             var usedPoints = new List<Vector3>();
+            for (int i = 0; i < cornerPoints.Count; i++)
+            {
+                //Offset makes sure the correct corner gets selected.
+                var cornerWithOffset = cornerPoints[i][1] + -_nodes.ElementAt(i).Key.transform.right * 4;
+                _offsetcorners.Add(cornerWithOffset);
+
+                Vector3? closestPoint = null;
+                for (int j = 0; j < cornerPoints.Count; j++)
+                {
+                    if (cornerPoints[i] == cornerPoints[j]) continue;
+                    
+                    
+                    if (!closestPoint.HasValue || Vector3.Distance(cornerWithOffset, cornerPoints[j][0]) < Vector3.Distance(cornerWithOffset, closestPoint.Value))
+                    {
+                        closestPoint = cornerPoints[j][0];
+                    }
+                    
+                }
+                
+                triangles.Add(vertices.IndexOf(cornerPoints[i][1]));
+                triangles.Add(vertices.IndexOf(closestPoint.Value));
+                triangles.Add(vertices.IndexOf(centerPoint));
+
+            }
             
-             for (int i = 0; i < cornerPoints.Count && _nodes.Count > 2; i += 2)
-             {
-                 if (usedPoints.Any(v => v == cornerPoints[i])) return;
-                 
-                 
-                 //Get closest point
-                 Vector3? closestPoint = null;
-                 foreach (var corner in cornerPoints)
-                 {
-                     if (corner == cornerPoints[i] || usedPoints.Any(v => v == corner)) continue; //Kan mss weg?
-                 
-                     if (!closestPoint.HasValue)
-                     {
-                         closestPoint = corner;
-                         continue;
-                     }
-                     
-                     if (Vector3.Distance(cornerPoints[i], corner) < Vector3.Distance(cornerPoints[i], closestPoint.Value))
-                     {
-                         closestPoint = corner;
-                     }
-                     
-                     
-                     Debug.Log("Looped once");
-                     
-                     triangles.Add(vertices.IndexOf(cornerPoints[i]));
-                     triangles.Add(vertices.IndexOf(closestPoint.Value));
-                     triangles.Add(vertices.IndexOf(centerPoint));
-                 }
-             }
             
-             
+            //Fix z-fighting
+             for (int i = 0; i < vertices.Count; i++)
+                 vertices[i] += Vector3.up * 0.01f;
+                 
             _mesh.Clear();
             _mesh.vertices = vertices.ToArray();
             _mesh.triangles = triangles.ToArray();
-            
             
         }
 
@@ -268,6 +264,16 @@ namespace RoadSystem
                 }
                 
             }
+
+
+
+            if (!_offsetcorners.Any()) return;
+
+            foreach (var corner in _offsetcorners)
+            {
+                Gizmos.DrawSphere(corner, 1f);
+            }
+            
         }
         
     }
