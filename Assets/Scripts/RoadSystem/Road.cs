@@ -174,17 +174,14 @@ namespace RoadSystem
             }
             
             
-            
             for (int i = 0; i < vertices.Count/2; i++)
             {
-                // float yPoint =  i == 0 ? 0 : ( (vertices.Count/2) / i); 
                 
                 uvs.Add(new Vector2(1, i));
                 uvs.Add(new Vector2(0, i));
+                
             }
             
-            Debug.Log("VerticesCount: " + vertices.Count);
-            Debug.Log("uvs count: " + uvs.Count);
             
             _mesh.Clear();
             _mesh.vertices = vertices.ToArray();
@@ -199,16 +196,10 @@ namespace RoadSystem
                     vertices.Add(start.transform.TransformPoint(((Vector3.right * laneWidth) * laneCount) +(Vector3.up *0.01f)));
                     vertices.Add(start.transform.TransformPoint(((Vector3.left * laneWidth) * laneCount) +(Vector3.up *0.01f)));
                     
-                    // uvs.Add(new Vector2(1,0));   // -> rechts van onder
-                    // uvs.Add(new Vector2(0,0));   // -> links van onder
                 }
                 
                 vertices.Add(end.transform.TransformPoint(((Vector3.right * laneWidth) * laneCount) +(Vector3.up *0.1f)));
                 vertices.Add(end.transform.TransformPoint(((Vector3.left * laneWidth) * laneCount) +(Vector3.up *0.01f)));
-                
-                // uvs.Add(new Vector2(1,1));   
-                // uvs.Add(new Vector2(0,1));   
-                
                 
                 triangles.AddRange(new []
                 {

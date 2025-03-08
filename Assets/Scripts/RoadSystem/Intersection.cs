@@ -2,6 +2,7 @@
 using System.Linq;
 using Model;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 namespace RoadSystem
@@ -26,7 +27,12 @@ namespace RoadSystem
             _mesh = new Mesh();
             
             GetComponent<MeshFilter>().mesh = _mesh;
-            GetComponent<MeshRenderer>().material = Resources.Load<Material>("RoadMaterial");
+
+            GetComponent<MeshRenderer>().material = new Material(Resources.Load<Material>("Asphalt"))
+            {
+                mainTextureScale = new Vector2(Mathf.Max(transform.localScale.x, transform.localScale.z), transform.localScale.y)
+            };
+            
         }
         
         
@@ -144,8 +150,7 @@ namespace RoadSystem
         }
         
         
-        //Testing
-        private List<Vector3> _offsetcorners = new();
+
         
         private void GenerateMesh()
         {
@@ -183,6 +188,7 @@ namespace RoadSystem
             //Start creating mesh.
             var vertices = new List<Vector3>();
             var triangles = new List<int>();
+            var uvs = new List<Vector2>();
 
             vertices.Add(centerPoint);
             
@@ -199,15 +205,14 @@ namespace RoadSystem
                 triangles.Add(vertices.IndexOf(centerPoint));
                 
             }
-
-
+            
+            
             //Generate edge triangles.
             for (int i = 0; i < cornerPoints.Count; i++)
             {
                 //Offset makes sure the correct corner gets selected.
                 var cornerWithOffset = cornerPoints[i][1] + -_nodes.ElementAt(i).Key.transform.right * 4;
-                _offsetcorners.Add(cornerWithOffset);
-
+            
                 Vector3? closestPoint = null;
                 for (int j = 0; j < cornerPoints.Count; j++)
                 {
@@ -226,16 +231,27 @@ namespace RoadSystem
                 triangles.Add(vertices.IndexOf(centerPoint));
 
             }
+
+            
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                vertices[i] += Vector3.up * 0.01f; //Fix z-fighting
+            }
             
             
-            //Fix z-fighting
-             for (int i = 0; i < vertices.Count; i++)
-                 vertices[i] += Vector3.up * 0.01f;
-                 
             _mesh.Clear();
+            
             _mesh.vertices = vertices.ToArray();
             _mesh.triangles = triangles.ToArray();
             
+            Bounds bounds = _mesh.bounds;
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                uvs.Add(new Vector2(vertices[i].x / bounds.size.x, vertices[i].z / bounds.size.z));
+            }
+            
+            _mesh.uv = uvs.ToArray();
+
         }
 
 
@@ -263,15 +279,6 @@ namespace RoadSystem
                     
                 }
                 
-            }
-
-
-
-            if (!_offsetcorners.Any()) return;
-
-            foreach (var corner in _offsetcorners)
-            {
-                Gizmos.DrawSphere(corner, 1f);
             }
             
         }
