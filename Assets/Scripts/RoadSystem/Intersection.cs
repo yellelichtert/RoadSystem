@@ -196,9 +196,6 @@ namespace RoadSystem
             }
             
             
-            
-            
-            
             //Start creating mesh.
             var vertices = new List<Vector3>();
             var triangles = new List<int>();

@@ -43,8 +43,7 @@ namespace RoadSystem
             nodes.parent = transform;
             controlPoints.parent = transform;
 
-            Path = new Path(nodes, controlPoints);
-            
+            Path = Path.Create(nodes, controlPoints);
             Path.PathChanged += PathChanged;
         }
         
@@ -69,20 +68,13 @@ namespace RoadSystem
             for (int s = 0; s < Path.SegmentAmount; s++)
             {
                 Segment selectedSegment = Path.GetSegment(s);
-
+                
                 if (selectedSegment.ControlPointAmount < 2) return;
-
-                if (selectedSegment is CurvedSegment curvedSegment)
+                
+                
+                for (int n = 0; n < selectedSegment.NodeAmount; n++)
                 {
-                    for (int n = 0; n < curvedSegment.NodeAmount; n++)
-                    {
-                        nodes.Add(curvedSegment.GetNode(n));
-                    }
-                }
-                else
-                {
-                    nodes.Add(selectedSegment.GetControlPoint(0));
-                    nodes.Add(selectedSegment.GetControlPoint(1));
+                    nodes.Add(selectedSegment.GetNode(n));
                 }
                 
             }
@@ -151,27 +143,27 @@ namespace RoadSystem
             for (int i = 0; i < Path.SegmentAmount; i++)
             {
                 Segment segment = Path.GetSegment(i);
+                
 
-                if (segment is CurvedSegment curvedSegment)
+                if (segment.ControlPointAmount == 2)
                 {
-                    Node startingNode = segment.GetControlPoint(0);
-
-                    for (int j = 0; j < curvedSegment.NodeAmount; j++)
-                    {
-                        Node endNode = curvedSegment.GetNode(j);
-                        
-                        GenerateQuad(startingNode, endNode);
-
-                        startingNode = endNode;
-                    }
-                    
+                    GenerateQuad(
+                    segment.GetControlPoint(0),
+                    segment.GetControlPoint(1)
+                    );
                 }
                 else
                 {
-                    GenerateQuad(
-                        segment.GetControlPoint(0),
-                        segment.GetControlPoint(1)
-                        );
+                    Node startingNode = segment.GetControlPoint(0);
+                    
+                    for (int j = 0; j < segment.NodeAmount; j++)
+                    {
+                        Node endNode = segment.GetNode(j);
+                        
+                        GenerateQuad(startingNode, endNode);
+                    
+                        startingNode = endNode;
+                    }
                 }
                 
             }

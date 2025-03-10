@@ -2,19 +2,24 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Path
+public class Path : ScriptableObject
 {
     public Action PathChanged;
     
     private List<Segment> _segments = new();
-    
-    public readonly Transform Nodes;
-    public readonly Transform ControlPoints;
 
-    public Path(Transform nodes, Transform controlPoints)
+    public Transform Nodes { get; private set; }
+    public Transform ControlPoints { get; private set; }
+
+    
+    public static Path Create(Transform nodes, Transform controlPoints)
     {
-        Nodes = nodes;
-        ControlPoints = controlPoints;
+        var path = CreateInstance<Path>();
+        
+        path.Nodes = nodes;
+        path.ControlPoints = controlPoints;
+        
+        return path;
     }
     
     public int SegmentAmount

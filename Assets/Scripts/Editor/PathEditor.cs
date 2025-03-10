@@ -1,4 +1,3 @@
-using System;
 using Model;
 using RoadSystem;
 using UnityEditor;
@@ -12,10 +11,6 @@ namespace Editor
         private Path Path => ((Road)target).Path;
 
 
-        private SegmentType _selectedSegmentType;
-        private enum SegmentType 
-        {Straight, Curved, ComplexCurved}
-        
         
         private int? _selectedSegment;
         private int? _selectedControlPoint;
@@ -27,33 +22,7 @@ namespace Editor
             Tools.current = Tool.None;
             
         }
-
-
-        public override void OnInspectorGUI()
-        {
-            
-            GUILayout.Label("Current segment type: " + _selectedSegmentType);
-            
-            GUILayout.BeginHorizontal();
-            
-            SegmentType[] type = (SegmentType[]) Enum.GetValues(typeof(SegmentType));
-            for (int i = 0; i < type.Length; i++)
-            {
-                
-                if (GUILayout.Button(type[i].ToString()))
-                {
-                    
-                    _selectedSegmentType = type[i];
-                    CreateSegment();
-                    
-                }
-                
-            }
-            
-            GUILayout.EndHorizontal();
-            
-            base.OnInspectorGUI();
-        }
+        
 
 
         private void OnSceneGUI()
@@ -124,6 +93,7 @@ namespace Editor
                     segment.SetControlPoint(_selectedControlPoint.Value, 
                         new Vector3(hit.point.x, terrainHeight, hit.point.z));
                     
+                    Debug.Log("Invoking path changed");
                     Path.PathChanged?.Invoke();
                 }
             }
@@ -145,13 +115,13 @@ namespace Editor
                          segment.GetControlPoint(1).GetPosition());
                      
                  }
-                 else if (segment is CurvedSegment curvedSegment)
+                 else
                  {
                      Vector3 previousNode = segment.GetControlPoint(0).GetPosition();
             
-                     for (int j = 0; j < curvedSegment.NodeAmount; j++)
+                     for (int j = 0; j < segment.NodeAmount; j++)
                      {
-                         Vector3 currentPosition = curvedSegment.GetNode(j).GetPosition();
+                         Vector3 currentPosition = segment.GetNode(j).GetPosition();
                          
                          Handles.DrawLine(currentPosition, previousNode);
                          previousNode = currentPosition;
@@ -170,13 +140,8 @@ namespace Editor
 
         private void CreateSegment()
         {
-            Segment segment = _selectedSegmentType switch
-            {
-                SegmentType.Straight => new Segment(),
-                SegmentType.Curved => new SimpleCurvedSegment(Path.Nodes),
-                SegmentType.ComplexCurved => new ComplexCurvedSegment(Path.Nodes),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            
+            var segment = Segment.Create(Path.Nodes);
 
             
             if (_selectedSegment is not null && Path.GetSegment(_selectedSegment.Value).IsCompleted)
