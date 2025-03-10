@@ -1,4 +1,5 @@
-﻿using RoadSystem;
+﻿using Model;
+using RoadSystem;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ namespace Editor
                 float roadWidth = roads[i].GetRoadWidth();
                 
                 
+                
                 var firstControlPoint = currentPath.GetSegment(0).GetControlPoint(0);
                 
                 Handles.color = Intersection.ContainsNode(firstControlPoint)
@@ -28,9 +30,8 @@ namespace Editor
                     : Color.white;
                 
                 if (Handles.Button(firstControlPoint.GetPosition(), Quaternion.identity, 1, 1, Handles.DotHandleCap))
-                {
-                    Intersection.AddNode(firstControlPoint, roadWidth);
-                }
+                    HandleClick(firstControlPoint, roadWidth, true);
+
                 
                 var lastControlPoint = currentPath.GetSegment(currentPath.SegmentAmount-1).GetControlPoint(2);
                 
@@ -39,18 +40,23 @@ namespace Editor
                     : Color.white;
                     
                 if (Handles.Button(lastControlPoint.GetPosition(), Quaternion.identity, 1, 1, Handles.DotHandleCap))
-                {
-                    if (!Intersection.ContainsNode(lastControlPoint))
-                    {
-                        Intersection.AddNode(lastControlPoint, roadWidth);
-                    }
-                    else
-                    {
-                        Intersection.RemoveNode(lastControlPoint);
-                    }
-                }
+                    HandleClick(lastControlPoint, roadWidth);
                 
             }
         }
+
+
+        private void HandleClick(Node node, float roadWidth, bool invertCorners = false)
+        {
+            if (!Intersection.ContainsNode(node))
+            {
+                Intersection.AddNode(node, roadWidth, invertCorners);
+            }
+            else
+            {
+                Intersection.RemoveNode(node);
+            }
+        }
+        
     }
 }

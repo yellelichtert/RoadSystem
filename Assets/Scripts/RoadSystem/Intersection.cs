@@ -12,7 +12,7 @@ namespace RoadSystem
     public class Intersection : MonoBehaviour
     {
         
-        private Dictionary<Node, (float roadWidth, Waypoint[] waypoints)> _nodes = new();
+        private Dictionary<Node, (float roadWidth, Waypoint[] waypoints, bool invertCorners)> _nodes = new();
         private Transform _waypointParent;
         private Mesh _mesh;
         
@@ -30,7 +30,7 @@ namespace RoadSystem
 
             GetComponent<MeshRenderer>().material = new Material(Resources.Load<Material>("Asphalt"))
             {
-                mainTextureScale = new Vector2(Mathf.Max(transform.localScale.x, transform.localScale.z), transform.localScale.y)
+                mainTextureScale = new Vector2(Mathf.Max(transform.localScale.x, transform.localScale.z), transform.localScale.y*2)
             };
             
         }
@@ -39,11 +39,11 @@ namespace RoadSystem
         
         public bool ContainsNode(Node node)
             => _nodes.ContainsKey(node);
-        
-        
-        
-        
-        public void AddNode(Node node, float roadWidth)
+
+
+
+
+        public void AddNode(Node node, float roadWidth, bool invertCorners = false)
         {
             
             if (ContainsNode(node))
@@ -67,7 +67,7 @@ namespace RoadSystem
             }  
             
             
-            _nodes.Add(node, (roadWidth, waypointsInRoad.ToArray()));
+            _nodes.Add(node, (roadWidth, waypointsInRoad.ToArray(), invertCorners));
 
             
            GenerateIntersection();
@@ -154,6 +154,8 @@ namespace RoadSystem
         
         private void GenerateMesh()
         {
+            _mesh.Clear();
+            
             //todo: Handle creating quad (temporary) or implement smooth edges
             if (_nodes.Count == 2)
             {
@@ -173,12 +175,24 @@ namespace RoadSystem
             {
                 var node = n.Key;
                 var width = n.Value.roadWidth;
-                
-                cornerPoints.Add(new []
+
+
+                if (!n.Value.invertCorners)
                 {
-                    node.GetPosition() + node.transform.right * width,
-                    node.GetPosition() + -node.transform.right * width
-                });
+                    cornerPoints.Add(new []
+                    {
+                        node.GetPosition() + node.transform.right * width,
+                        node.GetPosition() + -node.transform.right * width
+                    });
+                }
+                else
+                {
+                    cornerPoints.Add(new []
+                    {
+                        node.GetPosition() + -node.transform.right * width,
+                        node.GetPosition() + node.transform.right * width
+                    });
+                }
             }
             
             
@@ -212,7 +226,7 @@ namespace RoadSystem
             {
                 //Offset makes sure the correct corner gets selected.
                 var cornerWithOffset = cornerPoints[i][1] + -_nodes.ElementAt(i).Key.transform.right * 4;
-            
+                
                 Vector3? closestPoint = null;
                 for (int j = 0; j < cornerPoints.Count; j++)
                 {
@@ -239,10 +253,10 @@ namespace RoadSystem
             }
             
             
-            _mesh.Clear();
-            
             _mesh.vertices = vertices.ToArray();
             _mesh.triangles = triangles.ToArray();
+            _mesh.RecalculateNormals();
+            _mesh.RecalculateBounds();
             
             Bounds bounds = _mesh.bounds;
             for (int i = 0; i < vertices.Count; i++)
@@ -251,7 +265,7 @@ namespace RoadSystem
             }
             
             _mesh.uv = uvs.ToArray();
-
+            
         }
 
 

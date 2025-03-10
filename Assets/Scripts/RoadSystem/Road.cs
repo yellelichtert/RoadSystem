@@ -4,6 +4,7 @@ using Model;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace RoadSystem
 {
@@ -28,7 +29,10 @@ namespace RoadSystem
             _mesh = new Mesh();
 
             GetComponent<MeshFilter>().mesh = _mesh;
-            GetComponent<MeshRenderer>().material = Resources.Load<Material>("Asphalt");
+            GetComponent<MeshRenderer>().material = new Material(Resources.Load<Material>("Road"))
+            {
+                mainTextureScale = new Vector2(Mathf.Max(transform.localScale.x, transform.localScale.z), 1)
+            };
             
             _waypointParent = new GameObject("Waypoints").transform;
             _waypointParent.parent = transform;
@@ -93,7 +97,6 @@ namespace RoadSystem
             
             
             GenerateMesh();
-            
         }
         
         
@@ -187,6 +190,7 @@ namespace RoadSystem
             _mesh.vertices = vertices.ToArray();
             _mesh.triangles = triangles.ToArray();
             _mesh.uv = uvs.ToArray();
+            _mesh.RecalculateNormals();
             
             
             void GenerateQuad(Node start, Node end)
