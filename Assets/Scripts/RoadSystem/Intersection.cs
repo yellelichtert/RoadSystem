@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Model;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 namespace RoadSystem
@@ -15,7 +13,7 @@ namespace RoadSystem
         private Dictionary<Node, (float roadWidth, Waypoint[] waypoints, bool invertCorners)> _nodes = new();
         private Transform _waypointParent;
         private Mesh _mesh;
-        
+        private Vector3 _center;
         
         private void Awake()
         {
@@ -102,6 +100,11 @@ namespace RoadSystem
 
             if (_nodes.Count < 2) return;
             
+            _center = CurveUtils.FindCenter(_nodes
+                .Select(n => n.Key.GetPosition())
+                .ToArray()
+            );
+            
             CreateLinks();
             GenerateMesh();
         }
@@ -115,11 +118,13 @@ namespace RoadSystem
             
             foreach (var n in _nodes)
             {
-                
+                //Get all possible connections
                 var waypoints = n.Value.waypoints;
-                connections.AddRange(waypoints.Where(wp => wp.PreviousWaypoint is null));
+                var connectingPoint = waypoints.Where(wp => wp.PreviousWaypoint is null);
                 
+                connections.AddRange(connectingPoint);
             }
+            
             
             
             foreach (var n in _nodes)
@@ -139,7 +144,7 @@ namespace RoadSystem
                     for (var j = 0; j < currentConnections.Length; j++)
                     {
 
-                        waypoints[i].AddLink(currentConnections[j], _waypointParent);
+                        waypoints[i].AddLink(currentConnections[j], _waypointParent, _center);
 
                     }
 
@@ -154,6 +159,7 @@ namespace RoadSystem
         
         private void GenerateMesh()
         {
+            
             _mesh.Clear();
             
             //todo: Handle creating quad (temporary) or implement smooth edges
@@ -162,12 +168,6 @@ namespace RoadSystem
                 Debug.Log("CREATE QUAD");
                 return;
             }
-            
-            
-            var centerPoint = CurveUtils.FindCenter(_nodes
-                .Select(n => n.Key.GetPosition())
-                .ToArray()
-            );
             
             
             var cornerPoints = new List<Vector3[]>();
@@ -201,7 +201,7 @@ namespace RoadSystem
             var triangles = new List<int>();
             var uvs = new List<Vector2>();
 
-            vertices.Add(centerPoint);
+            vertices.Add(_center);
             
             
             //Generate triangles attached to roads.
@@ -213,7 +213,7 @@ namespace RoadSystem
                 
                 triangles.Add(vertices.IndexOf(cornerPoints[i][0]));
                 triangles.Add(vertices.IndexOf(cornerPoints[i][1]));
-                triangles.Add(vertices.IndexOf(centerPoint));
+                triangles.Add(vertices.IndexOf(_center));
                 
             }
             
@@ -239,7 +239,7 @@ namespace RoadSystem
                 
                 triangles.Add(vertices.IndexOf(cornerPoints[i][1]));
                 triangles.Add(vertices.IndexOf(closestPoint.Value));
-                triangles.Add(vertices.IndexOf(centerPoint));
+                triangles.Add(vertices.IndexOf(_center));
 
             }
 
@@ -264,8 +264,7 @@ namespace RoadSystem
             _mesh.uv = uvs.ToArray();
             
         }
-
-
+        
         
         
         private void OnDrawGizmosSelected()
@@ -291,9 +290,9 @@ namespace RoadSystem
                 }
                 
             }
+
+            Gizmos.DrawSphere(_center,  1);
             
         }
-        
     }
-    
 }
