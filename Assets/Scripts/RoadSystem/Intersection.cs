@@ -77,18 +77,7 @@ namespace RoadSystem
         
         public void RemoveNode(Node node)
         {
-            
-            for (int i = 0; i < _waypointParent.childCount;)
-            {
-                
-                DestroyImmediate(_waypointParent.GetChild(i).gameObject);
-                
-            }
-            
-            
             _nodes.Remove(node);
-            
-
             GenerateIntersection();
             
         }
@@ -97,13 +86,17 @@ namespace RoadSystem
         
         private void GenerateIntersection()
         {
-
+            
+            for (int i = 0; i < _waypointParent.childCount;)
+                DestroyImmediate(_waypointParent.GetChild(i).gameObject);
+            
             if (_nodes.Count < 2) return;
             
             _center = CurveUtils.FindCenter(_nodes
                 .Select(n => n.Key.GetPosition())
                 .ToArray()
             );
+            
             
             CreateLinks();
             GenerateMesh();
@@ -123,6 +116,12 @@ namespace RoadSystem
                 var connectingPoint = waypoints.Where(wp => wp.PreviousWaypoint is null);
                 
                 connections.AddRange(connectingPoint);
+                
+                //Create u turns
+                var connection = waypoints.First(wp => wp.PreviousWaypoint is null);
+                var turningLane = waypoints.First(wp => wp.NextWaypoint is null);
+                
+                turningLane.AddLink(connection, _waypointParent, _center);
             }
             
             
