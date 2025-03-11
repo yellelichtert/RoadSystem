@@ -16,10 +16,13 @@
   
    ![Intersection](https://github.com/user-attachments/assets/297195cf-5c5d-487b-955b-1a6b85d6db0a)
 
-
   
-- **Waypoint System**: Automatically place waypoints along roads for pathfinding.
 - **Pathfinding Utility**: Integrated support for pathfinding, making it easier to move AI or characters along roads.
+  
+  ![Pathfinding](https://github.com/user-attachments/assets/520c4206-c0df-44d3-8f15-b7fd9c63800c)
+
+
+- **Waypoint System**: Automatically place waypoints along roads for pathfinding.
 - **Custom Editor Window**: Access the tool from a custom editor window with a user-friendly interface for controlling road creation and settings.
 
 ## Installation
