@@ -19,7 +19,7 @@
   
 - **Pathfinding Utility**: Integrated support for pathfinding, making it easier to move AI or characters along roads.
   
-  ![Pathfinding](https://github.com/user-attachments/assets/520c4206-c0df-44d3-8f15-b7fd9c63800c)
+  ![Pathfinding](https://github.com/user-attachments/assets/cec7b855-2486-42d9-8115-08585c40cd08)
 
 
 - **Waypoint System**: Automatically place waypoints along roads for pathfinding.
