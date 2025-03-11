@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace Model
     {
         [CanBeNull] public Waypoint PreviousWaypoint { get; set; }
         [CanBeNull] public Waypoint NextWaypoint { get; set; }
-        [CanBeNull] public List<Waypoint[]> LinkedWaypoints { get; private set; }
+        [CanBeNull] public List<(Waypoint dest, Waypoint link)> LinkedWaypoints { get; private set; }
         
         public bool isLink;
         
@@ -29,21 +30,22 @@ namespace Model
             if (LinkedWaypoints is null) 
                 LinkedWaypoints = new();
 
-            
-            
-            List<Waypoint> linkedPoints = new();
+            var containtsIndex = LinkedWaypoints.FindIndex(x => x.dest == link);
+            if (containtsIndex != -1)
+                LinkedWaypoints.RemoveAt(containtsIndex);
 
+            Debug.Log("Links count" + LinkedWaypoints.Count);
             
-            
-            Vector3 middlePoint = Utils.FindIntersectionPoint(
+            Vector3 middlePoint = CurveUtils.FindIntersectionPoint(
                 GetPosition(), transform.forward
                 ,link.GetPosition(), -link.transform.forward);
+       
             
             
-            Waypoint previousPoint = null;
+            Waypoint previousPoint = this;
             for (float t = 0; t < 1; t += 0.05f)
             {
-                Vector3 nextPostition = Utils.CalculateCurvePoint(t,
+                Vector3 nextPostition = CurveUtils.CalculateCurvePoint(t,
                     GetPosition(),
                     middlePoint,
                     link.GetPosition()
@@ -51,16 +53,23 @@ namespace Model
                 
                 Waypoint newPoint = Create(nextPostition, parent, true);
                 
-                newPoint.PreviousWaypoint = previousPoint ?? this;
-                previousPoint = newPoint;
-            
-                linkedPoints.Add(newPoint);
+                if (Mathf.Approximately(t, 0.05f))
+                    LinkedWaypoints.Add((link, newPoint));
                 
+                
+                newPoint.PreviousWaypoint = previousPoint;
+
+                if (previousPoint != this)
+                    previousPoint.NextWaypoint = newPoint;
+                
+                previousPoint = newPoint;
+
+                if (Mathf.Approximately(t, 0.95f))
+                {
+                    newPoint.NextWaypoint = link;
+                }
+
             }
-            
-            
-            LinkedWaypoints.Add(linkedPoints.ToArray());
-            
         }
         
         

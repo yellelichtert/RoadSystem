@@ -95,7 +95,7 @@ public class Segment : ScriptableObject
         
         for (float t = 0; t < 1; t += 0.05f)
         {
-            Vector3 position = Utils.CalculateCurvePoint(t,
+            Vector3 position = CurveUtils.CalculateCurvePoint(t,
                 GetControlPoint(0).GetPosition(),
                 GetControlPoint(1).GetPosition(),
                 GetControlPoint(2).GetPosition()

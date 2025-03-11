@@ -164,7 +164,7 @@ namespace RoadSystem
             }
             
             
-            var centerPoint = Utils.FindCenter(_nodes
+            var centerPoint = CurveUtils.FindCenter(_nodes
                 .Select(n => n.Key.GetPosition())
                 .ToArray()
             );

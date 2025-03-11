@@ -1,6 +1,6 @@
 ﻿using Vector3 = UnityEngine.Vector3;
 
-public static class Utils
+public static class CurveUtils
 {
     
     public static Vector3[] CalculateCurve(int pCount, Vector3 cp1, Vector3 cp2, Vector3 cp3)
