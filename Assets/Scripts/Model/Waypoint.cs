@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -24,7 +22,7 @@ namespace Model
         
         
         
-        public void AddLink(Waypoint link, Transform parent)
+        public void AddLink(Waypoint link, Transform parent, Vector3 curvePoint)
         {
             
             if (LinkedWaypoints is null) 
@@ -33,13 +31,6 @@ namespace Model
             var containtsIndex = LinkedWaypoints.FindIndex(x => x.dest == link);
             if (containtsIndex != -1)
                 LinkedWaypoints.RemoveAt(containtsIndex);
-
-            Debug.Log("Links count" + LinkedWaypoints.Count);
-            
-            Vector3 middlePoint = CurveUtils.FindIntersectionPoint(
-                GetPosition(), transform.forward
-                ,link.GetPosition(), -link.transform.forward);
-       
             
             
             Waypoint previousPoint = this;
@@ -47,7 +38,7 @@ namespace Model
             {
                 Vector3 nextPostition = CurveUtils.CalculateCurvePoint(t,
                     GetPosition(),
-                    middlePoint,
+                    curvePoint,
                     link.GetPosition()
                 );
                 
@@ -94,10 +85,14 @@ namespace Model
 
         private void OnDrawGizmos()
         {
+
+
+            if (!isLink)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawSphere(GetPosition(), 0.5f);
+            }
             
-            
-            Gizmos.color = isLink ? Color.blue : Color.red;
-            Gizmos.DrawSphere(GetPosition(), 0.5f);
                 
             
            

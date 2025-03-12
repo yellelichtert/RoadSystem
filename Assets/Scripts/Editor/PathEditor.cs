@@ -93,7 +93,6 @@ namespace Editor
                     segment.SetControlPoint(_selectedControlPoint.Value, 
                         new Vector3(hit.point.x, terrainHeight, hit.point.z));
                     
-                    Debug.Log("Invoking path changed");
                     Path.PathChanged?.Invoke();
                 }
             }

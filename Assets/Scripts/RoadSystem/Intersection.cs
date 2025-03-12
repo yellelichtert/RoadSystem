@@ -15,6 +15,9 @@ namespace RoadSystem
         private Mesh _mesh;
         private Vector3 _center;
         
+        public int NodeCount => _nodes.Count;
+        
+        
         private void Awake()
         {
             transform.position = Vector3.zero;
@@ -34,13 +37,10 @@ namespace RoadSystem
         }
         
         
-        
         public bool ContainsNode(Node node)
             => _nodes.ContainsKey(node);
 
-
-
-
+        
         public void AddNode(Node node, float roadWidth, bool invertCorners = false)
         {
             

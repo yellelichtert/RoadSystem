@@ -12,9 +12,22 @@ namespace RoadSystem
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class Road : MonoBehaviour
     {
-        [SerializeField] private int laneCount = 1;
-        [SerializeField] private float laneWidth = 8;
-        [SerializeField] private bool oneWay;
+        private float _laneWidth = 8;
+        public float LaneWidth
+        {
+            get => _laneWidth;
+            set
+            {
+                _laneWidth = value;
+                PathChanged();
+            }
+        }
+        
+        
+        //todo: implement and expose inside of editor
+        private int _maxSpeed = 50;
+        private int _laneCount = 1;
+        private bool _oneWay;
         
         private List<Waypoint> _waypoints = new();
         private Transform _waypointParent;
@@ -50,7 +63,7 @@ namespace RoadSystem
 
 
         public float GetRoadWidth()
-            => laneWidth * laneCount;
+            => _laneWidth * _laneCount;
     
         private void PathChanged()
         {
@@ -81,7 +94,7 @@ namespace RoadSystem
             
             GenerateWaypoints(nodes.ToArray());
 
-            if (!oneWay)
+            if (!_oneWay)
             {
                 nodes.Reverse();
                 GenerateWaypoints(nodes.ToArray(), true);
@@ -96,7 +109,7 @@ namespace RoadSystem
         private void GenerateWaypoints(Node[] points, bool left = false)
         {
             
-            for (int i = 0; i < laneCount; i++)
+            for (int i = 0; i < _laneCount; i++)
             {
 
                 Waypoint previousPoint = null;
@@ -105,7 +118,7 @@ namespace RoadSystem
                 for (int p = 0; p < points.Length; p++)
                 { 
                     Vector3 newPosition = points[p].transform.TransformPoint(
-                        (left ? Vector3.left : Vector3.right) * ((laneWidth / 2) + (laneWidth*i) ));
+                        (left ? Vector3.left : Vector3.right) * ((_laneWidth / 2) + (_laneWidth*i) ));
                     
                     
                     Waypoint wp = Waypoint.Create(newPosition, _waypointParent);
@@ -189,13 +202,13 @@ namespace RoadSystem
             {
                 if (vertices.Count == 0)
                 {
-                    vertices.Add(start.transform.TransformPoint(((Vector3.right * laneWidth) * laneCount) +(Vector3.up *0.01f)));
-                    vertices.Add(start.transform.TransformPoint(((Vector3.left * laneWidth) * laneCount) +(Vector3.up *0.01f)));
+                    vertices.Add(start.transform.TransformPoint(((Vector3.right * _laneWidth) * _laneCount) +(Vector3.up *0.01f)));
+                    vertices.Add(start.transform.TransformPoint(((Vector3.left * _laneWidth) * _laneCount) +(Vector3.up *0.01f)));
                     
                 }
                 
-                vertices.Add(end.transform.TransformPoint(((Vector3.right * laneWidth) * laneCount) +(Vector3.up *0.01f)));
-                vertices.Add(end.transform.TransformPoint(((Vector3.left * laneWidth) * laneCount) +(Vector3.up *0.01f)));
+                vertices.Add(end.transform.TransformPoint(((Vector3.right * _laneWidth) * _laneCount) +(Vector3.up *0.01f)));
+                vertices.Add(end.transform.TransformPoint(((Vector3.left * _laneWidth) * _laneCount) +(Vector3.up *0.01f)));
                 
                 triangles.AddRange(new []
                 {
