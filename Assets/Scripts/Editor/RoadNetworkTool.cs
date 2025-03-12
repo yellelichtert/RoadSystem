@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
-using NUnit.Framework;
 using RoadSystem;
 using Unity.VisualScripting;
 using UnityEditor;
-using UnityEditor.EditorTools;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Editor
 {
@@ -38,7 +35,7 @@ namespace Editor
             {
                 _network.DeleteRoad(_selectedRoad);
             }
-            else if (_selectedIntersection is not null)
+            else if (_selectedIntersection is not null && _selectedIntersection.NodeCount < 2)
             {
                 _network.DeleteIntersection(_selectedIntersection);
             }
